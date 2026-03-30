@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+
+{% block title %}Booking Details - PNR: {{ booking.airline_pnr }} - FlightReserve{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header with back button -->
+        <div class="mb-8">
+            <a href="{% url 'my_bookings' %}" class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4">
+                <i class="fas fa-arrow-left mr-2"></i> Back to My Bookings
+            </a>
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-ticket-alt text-blue-600 mr-3"></i>
+                        Booking Details
+                    </h1>
+                    <p class="mt-2 text-gray-600">PNR: <span class="font-semibold">{{ booking.airline_pnr }}</span></p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    {% if booking.status == 'HOLD' %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                        <i class="fas fa-clock mr-1"></i> ON HOLD
+                    </span>
+                    {% elif booking.status == 'TICKETED' %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                        <i class="fas fa-check-circle mr-1"></i> TICKETED
+                    </span>
+                    {% elif booking.status == 'EXPIRED' %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                        <i class="fas fa-times-circle mr-1"></i> EXPIRED
+                    </span>
+                    {% endif %}
+                    
+                    <a href="{% url 'download_itinerary' pnr=booking.airline_pnr %}" 
+                       class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-download mr-2"></i> Download Itinerary
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Information Card -->
+        <div class="bg-white shadow-lg rounded-xl p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Booking Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2">Booking Reference</h3>
+                    <p class="text-lg font-semibold text-gray-900">{{ booking.airline_pnr }}</p>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2">GDS Reference</h3>
+                    <p class="text-lg font-semibold text-gray-900">{{ booking.gds_reference|default:"N/A" }}</p>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2">Booking Date</h3>
+                    <p class="text-lg font-semibold text-gray-900">{{ booking.created_at|date:"F d, Y" }}</p>
+                    <p class="text-sm text-gray-500">{{ booking.created_at|time:"g:i A" }}</p>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2">Expires On</h3>
+                    <p class="text-lg font-semibold {% if booking.status == 'HOLD' %}text-yellow-600{% else %}text-gray-900{% endif %}">
+                        {{ booking.expires_at|date:"F d, Y" }}
+                    </p>
+                    <p class="text-sm text-gray-500">{{ booking.expires_at|time:"g:i A" }}</p>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2">Total Price</h3>
+                    <p class="text-2xl font-bold text-green-600">${{ booking.total_price }}</p>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2">Contact Email</h3>
+                    <p class="text-lg font-semibold text-gray-900">{{ booking.contact_email }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flight Information -->
+        {% if flight %}
+        <div class="bg-white shadow-lg rounded-xl p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Flight Information</h2>
+            
+            <div class="border border-gray-200 rounded-lg p-4 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">
+                            {{ flight.origin }} <i class="fas fa-arrow-right mx-2 text-gray-400"></i> {{ flight.destination }}
+                        </h3>
+                        <p class="text-gray-600">{{ flight.airline_name }} • {{ flight.flight_number }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-2xl font-bold text-green-600">${{ flight.price.total|default:booking.total_price }}</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between py-4 border-t border-b border-gray-200">
+                    <div class="text-center">
+                        <p class="text-sm text-gray-500">Departure</p>
+                        <p class="text-xl font-bold text-gray-900">
+                            {% if flight.departure_time %}
+                                {{ flight.departure_time|date:"h:i A" }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </p>
+                        <p class="text-sm text-gray-600">{{ flight.origin }}</p>
+                    </div>
+                    <div class="flex-1 px-8">
+                        <div class="relative">
+                            <div class="h-0.5 bg-gray-300"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <i class="fas fa-plane text-gray-400"></i>
+                            </div>
+                        </div>
+                        <p class="text-center text-sm text-gray-500 mt-2">{{ flight.duration|default:"N/A" }}</p>
+                        {% if flight.stops > 0 %}
+                        <p class="text-center text-xs text-gray-500">{{ flight.stops }} stop{{ flight.stops|pluralize }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-gray-500">Arrival</p>
+                        <p class="text-xl font-bold text-gray-900">
+                            {% if flight.arrival_time %}
+                                {{ flight.arrival_time|date:"h:i A" }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </p>
+                        <p class="text-sm text-gray-600">{{ flight.destination }}</p>
+                    </div>
+                </div>
+                
+                {% if flight.departure_date %}
+                <div class="mt-4 text-center">
+                    <p class="text-gray-600">
+                        <i class="far fa-calendar mr-2"></i>
+                        {{ flight.departure_date|date:"l, F d, Y" }}
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Passenger Information -->
+        {% if passengers %}
+        <div class="bg-white shadow-lg rounded-xl p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Passenger Information</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            {% comment %} <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date of Birth</th> {% endcomment %}
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for passenger in passengers %}
+                        <tr>
+                            <td class="px-4 py-3">
+                                <div class="text-sm font-medium text-gray-900">
+                                    {{ passenger.name.firstName }} {{ passenger.name.lastName }}
+                                </div>
+                                <div class="text-xs text-gray-500">Traveler {{ passenger.id }}</div>
+                            </td>
+                            {% comment %} <td class="px-4 py-3 text-sm text-gray-900">
+                                {{ passenger.dateOfBirth|date:"M d, Y" }}
+                            </td> {% endcomment %}
+                            <td class="px-4 py-3">
+                                <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded">
+                                    {{ passenger.gender|default:"-" }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-900">
+                                {{ passenger.contact.emailAddress|default:"-" }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-900">
+                                {% if passenger.documents %}
+                                    {{ passenger.documents.0.documentType }}: {{ passenger.documents.0.number|truncatechars:10 }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="mt-8 flex justify-between">
+            <a href="{% url 'my_bookings' %}" 
+               class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                <i class="fas fa-arrow-left mr-2"></i> Back to My Bookings
+            </a>
+            
+            <div class="flex space-x-3">
+                <a href="{% url 'download_official_itinerary' pnr=booking.airline_pnr %}" 
+                   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                    <i class="fas fa-download mr-2"></i> Download Official Itinerary
+                </a>
+                
+                {% if booking.status == 'HOLD' %}
+                <button class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                    <i class="fas fa-credit-card mr-2"></i> Complete Ticketing
+                </button>
+                <button class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                    <i class="fas fa-times mr-2"></i> Cancel Reservation
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

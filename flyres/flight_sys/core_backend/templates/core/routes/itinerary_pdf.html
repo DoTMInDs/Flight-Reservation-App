@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Itinerary - PNR: {{ booking.airline_pnr }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .section { margin-bottom: 25px; }
+        .section-title { font-size: 18px; font-weight: bold; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 15px; }
+        .info-row { margin-bottom: 10px; }
+        .label { font-weight: bold; display: inline-block; width: 150px; }
+        .flight-details { border: 1px solid #ccc; padding: 15px; margin: 15px 0; }
+        .passenger-table { width: 100%; border-collapse: collapse; }
+        .passenger-table th, .passenger-table td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        .passenger-table th { background-color: #f5f5f5; }
+        .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Flight Itinerary</h1>
+        <h2>PNR: {{ booking.airline_pnr }}</h2>
+        <p>Generated on: {% now "F d, Y H:i" %}</p>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">Booking Information</div>
+        <div class="info-row"><span class="label">Booking Reference:</span> {{ booking.airline_pnr }}</div>
+        <div class="info-row"><span class="label">Booking Date:</span> {{ booking.created_at|date:"F d, Y H:i" }}</div>
+        <div class="info-row"><span class="label">Status:</span> {{ booking.status }}</div>
+        <div class="info-row"><span class="label">Total Price:</span> ${{ booking.total_price }}</div>
+        <div class="info-row"><span class="label">Contact Email:</span> {{ booking.contact_email }}</div>
+    </div>
+    
+    {% if flight %}
+    <div class="section">
+        <div class="section-title">Flight Information</div>
+        <div class="flight-details">
+            <div class="info-row"><span class="label">Route:</span> {{ flight.origin }} to {{ flight.destination }}</div>
+            <div class="info-row"><span class="label">Airline:</span> {{ flight.airline_name }}</div>
+            <div class="info-row"><span class="label">Flight Number:</span> {{ flight.flight_number }}</div>
+            {% if flight.departure %}
+            <div class="info-row"><span class="label">Departure:</span> {{ flight.departure|date:"F d, Y H:i" }}</div>
+            {% endif %}
+            {% if flight.arrival %}
+            <div class="info-row"><span class="label">Arrival:</span> {{ flight.arrival|date:"F d, Y H:i" }}</div>
+            {% endif %}
+            <div class="info-row"><span class="label">Duration:</span> {{ flight.duration }}</div>
+            <div class="info-row"><span class="label">Stops:</span> {{ flight.stops }}</div>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if passengers %}
+    <div class="section">
+        <div class="section-title">Passenger Information</div>
+        <table class="passenger-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Date of Birth</th>
+                    <th>Gender</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for passenger in passengers %}
+                <tr>
+                    <td>{{ passenger.name.firstName }} {{ passenger.name.lastName }}</td>
+                    <td>{{ passenger.dateOfBirth|date:"M d, Y" }}</td>
+                    <td>{{ passenger.gender|default:"-" }}</td>
+                    <td>{{ passenger.contact.emailAddress|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    
+    <div class="footer">
+        <p>Thank you for choosing FlightReserve!</p>
+        <p>For any questions, please contact support@flightreserve.com</p>
+    </div>
+</body>
+</html>

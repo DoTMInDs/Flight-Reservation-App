@@ -1,0 +1,357 @@
+{
+  "data": {
+    "type": "flight-offers-pricing",
+    "flightOffers": [
+      {
+        "type": "flight-offer",
+        "id": "1",
+        "source": "GDS",
+        "instantTicketingRequired": false,
+        "nonHomogeneous": false,
+        "oneWay": false,
+        "isUpsellOffer": false,
+        "lastTicketingDate": "2026-01-27",
+        "lastTicketingDateTime": "2026-01-27",
+        "numberOfBookableSeats": 1,
+        "itineraries": [
+          {
+            "duration": "PT9H40M",
+            "segments": [
+              {
+                "departure": {
+                  "iataCode": "ACC",
+                  "terminal": "3",
+                  "at": "2026-09-28T22:30:00"
+                },
+                "arrival": {
+                  "iataCode": "FCO",
+                  "terminal": "3",
+                  "at": "2026-09-29T06:15:00"
+                },
+                "carrierCode": "AZ",
+                "number": "853",
+                "aircraft": {
+                  "code": "32Q"
+                },
+                "operating": {
+                  "carrierCode": "AZ"
+                },
+                "duration": "PT5H45M",
+                "id": "21",
+                "numberOfStops": 0,
+                "blacklistedInEU": false
+              },
+              {
+                "departure": {
+                  "iataCode": "FCO",
+                  "terminal": "1",
+                  "at": "2026-09-29T08:35:00"
+                },
+                "arrival": {
+                  "iataCode": "MUC",
+                  "terminal": "2",
+                  "at": "2026-09-29T10:10:00"
+                },
+                "carrierCode": "AZ",
+                "number": "432",
+                "aircraft": {
+                  "code": "223"
+                },
+                "operating": {
+                  "carrierCode": "AZ"
+                },
+                "duration": "PT1H35M",
+                "id": "22",
+                "numberOfStops": 0,
+                "blacklistedInEU": false
+              }
+            ]
+          },
+          {
+            "duration": "PT10H15M",
+            "segments": [
+              {
+                "departure": {
+                  "iataCode": "MUC",
+                  "terminal": "2",
+                  "at": "2026-10-08T11:00:00"
+                },
+                "arrival": {
+                  "iataCode": "FCO",
+                  "terminal": "1",
+                  "at": "2026-10-08T12:35:00"
+                },
+                "carrierCode": "AZ",
+                "number": "437",
+                "aircraft": {
+                  "code": "223"
+                },
+                "operating": {
+                  "carrierCode": "AZ"
+                },
+                "duration": "PT1H35M",
+                "id": "31",
+                "numberOfStops": 0,
+                "blacklistedInEU": false
+              },
+              {
+                "departure": {
+                  "iataCode": "FCO",
+                  "terminal": "1",
+                  "at": "2026-10-08T15:30:00"
+                },
+                "arrival": {
+                  "iataCode": "ACC",
+                  "terminal": "3",
+                  "at": "2026-10-08T19:15:00"
+                },
+                "carrierCode": "AZ",
+                "number": "852",
+                "aircraft": {
+                  "code": "32Q"
+                },
+                "operating": {
+                  "carrierCode": "AZ"
+                },
+                "duration": "PT5H45M",
+                "id": "32",
+                "numberOfStops": 0,
+                "blacklistedInEU": false
+              }
+            ]
+          }
+        ],
+        "price": {
+          "currency": "EUR",
+          "total": "625.08",
+          "base": "188.00",
+          "fees": [
+            {
+              "amount": "0.00",
+              "type": "SUPPLIER"
+            },
+            {
+              "amount": "0.00",
+              "type": "TICKETING"
+            }
+          ],
+          "grandTotal": "625.08"
+        },
+        "pricingOptions": {
+          "fareType": [
+            "PUBLISHED"
+          ],
+          "includedCheckedBagsOnly": true
+        },
+        "validatingAirlineCodes": [
+          "AZ"
+        ],
+        "travelerPricings": [
+          {
+            "travelerId": "1",
+            "fareOption": "STANDARD",
+            "travelerType": "ADULT",
+            "price": {
+              "currency": "EUR",
+              "total": "625.08",
+              "base": "188.00"
+            },
+            "fareDetailsBySegment": [
+              {
+                "segmentId": "21",
+                "cabin": "ECONOMY",
+                "fareBasis": "SLHXIYNC",
+                "brandedFare": "ECOSAVER",
+                "brandedFareLabel": "ECONOMY SAVER",
+                "class": "S",
+                "includedCheckedBags": {
+                  "quantity": 1
+                },
+                "includedCabinBags": {
+                  "quantity": 1
+                },
+                "amenities": [
+                  {
+                    "description": "ADVANCE SEAT RESERVATION",
+                    "isChargeable": true,
+                    "amenityType": "PRE_RESERVED_SEAT",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MEAL AND WINE",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "BACK SEAT",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  }
+                ]
+              },
+              {
+                "segmentId": "22",
+                "cabin": "ECONOMY",
+                "fareBasis": "SLHXIYNC",
+                "brandedFare": "ECOSAVER",
+                "brandedFareLabel": "ECONOMY SAVER",
+                "class": "S",
+                "includedCheckedBags": {
+                  "quantity": 1
+                },
+                "includedCabinBags": {
+                  "quantity": 1
+                },
+                "amenities": [
+                  {
+                    "description": "ADVANCE SEAT RESERVATION",
+                    "isChargeable": true,
+                    "amenityType": "PRE_RESERVED_SEAT",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MEAL AND WINE",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "BACK SEAT",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  }
+                ]
+              },
+              {
+                "segmentId": "31",
+                "cabin": "ECONOMY",
+                "fareBasis": "TLHXIYNC",
+                "brandedFare": "ECOSAVER",
+                "brandedFareLabel": "ECONOMY SAVER",
+                "class": "T",
+                "includedCheckedBags": {
+                  "quantity": 1
+                },
+                "includedCabinBags": {
+                  "quantity": 1
+                },
+                "amenities": [
+                  {
+                    "description": "ADVANCE SEAT RESERVATION",
+                    "isChargeable": true,
+                    "amenityType": "PRE_RESERVED_SEAT",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MEAL AND WINE",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "BACK SEAT",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  }
+                ]
+              },
+              {
+                "segmentId": "32",
+                "cabin": "ECONOMY",
+                "fareBasis": "TLHXIYNC",
+                "brandedFare": "ECOSAVER",
+                "brandedFareLabel": "ECONOMY SAVER",
+                "class": "T",
+                "includedCheckedBags": {
+                  "quantity": 1
+                },
+                "includedCabinBags": {
+                  "quantity": 1
+                },
+                "amenities": [
+                  {
+                    "description": "ADVANCE SEAT RESERVATION",
+                    "isChargeable": true,
+                    "amenityType": "PRE_RESERVED_SEAT",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MEAL AND WINE",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "BACK SEAT",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "travelers": [
+      {
+        "id": "1",
+        "dateOfBirth": "1999-11-22",
+        "name": {
+          "firstName": "Richard",
+          "lastName": "Abbey"
+        },
+        "gender": "MALE",
+        "contact": {
+          "emailAddress": "abeikuabban3@gmail.com",
+          "phones": [
+            {
+              "deviceType": "MOBILE",
+              "countryCallingCode": "1",
+              "number": "0244788123"
+            }
+          ]
+        },
+        "documents": [
+          {
+            "documentType": "PASSPORT",
+            "number": "GA172340",
+            "expiryDate": "2032-06-15",
+            "issuanceCountry": "GH",
+            "nationality": "GH",
+            "holder": true
+          }
+        ]
+      }
+    ]
+  }
+}

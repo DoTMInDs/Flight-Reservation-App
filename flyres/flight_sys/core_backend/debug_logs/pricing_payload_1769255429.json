@@ -1,0 +1,481 @@
+{
+  "data": {
+    "type": "flight-offers-pricing",
+    "flightOffers": [
+      {
+        "type": "flight-offer",
+        "id": "1",
+        "source": "GDS",
+        "instantTicketingRequired": false,
+        "nonHomogeneous": false,
+        "oneWay": false,
+        "isUpsellOffer": false,
+        "lastTicketingDate": "2026-01-27",
+        "lastTicketingDateTime": "2026-01-27",
+        "numberOfBookableSeats": 9,
+        "itineraries": [
+          {
+            "duration": "PT10H35M",
+            "segments": [
+              {
+                "departure": {
+                  "iataCode": "ACC",
+                  "terminal": "3",
+                  "at": "2026-03-20T22:45:00"
+                },
+                "arrival": {
+                  "iataCode": "BRU",
+                  "at": "2026-03-21T06:25:00"
+                },
+                "carrierCode": "SN",
+                "number": "278",
+                "aircraft": {
+                  "code": "333"
+                },
+                "operating": {
+                  "carrierCode": "SN"
+                },
+                "duration": "PT6H40M",
+                "id": "18",
+                "numberOfStops": 0,
+                "blacklistedInEU": false
+              },
+              {
+                "departure": {
+                  "iataCode": "BRU",
+                  "at": "2026-03-21T09:05:00"
+                },
+                "arrival": {
+                  "iataCode": "MUC",
+                  "terminal": "2",
+                  "at": "2026-03-21T10:20:00"
+                },
+                "carrierCode": "SN",
+                "number": "7051",
+                "aircraft": {
+                  "code": "319"
+                },
+                "operating": {
+                  "carrierName": "LUFTHANSA CITYLINE FOR LUFTHANSA"
+                },
+                "duration": "PT1H15M",
+                "id": "19",
+                "numberOfStops": 0,
+                "blacklistedInEU": false
+              }
+            ]
+          },
+          {
+            "duration": "PT9H55M",
+            "segments": [
+              {
+                "departure": {
+                  "iataCode": "MUC",
+                  "terminal": "2",
+                  "at": "2026-03-27T08:55:00"
+                },
+                "arrival": {
+                  "iataCode": "BRU",
+                  "at": "2026-03-27T10:20:00"
+                },
+                "carrierCode": "SN",
+                "number": "2642",
+                "aircraft": {
+                  "code": "319"
+                },
+                "operating": {
+                  "carrierCode": "SN"
+                },
+                "duration": "PT1H25M",
+                "id": "61",
+                "numberOfStops": 0,
+                "blacklistedInEU": false
+              },
+              {
+                "departure": {
+                  "iataCode": "BRU",
+                  "at": "2026-03-27T12:00:00"
+                },
+                "arrival": {
+                  "iataCode": "ACC",
+                  "terminal": "3",
+                  "at": "2026-03-27T17:50:00"
+                },
+                "carrierCode": "SN",
+                "number": "277",
+                "aircraft": {
+                  "code": "333"
+                },
+                "operating": {
+                  "carrierCode": "SN"
+                },
+                "duration": "PT6H50M",
+                "id": "62",
+                "numberOfStops": 0,
+                "blacklistedInEU": false
+              }
+            ]
+          }
+        ],
+        "price": {
+          "currency": "EUR",
+          "total": "598.78",
+          "base": "189.00",
+          "fees": [
+            {
+              "amount": "0.00",
+              "type": "SUPPLIER"
+            },
+            {
+              "amount": "0.00",
+              "type": "TICKETING"
+            }
+          ],
+          "grandTotal": "598.78"
+        },
+        "pricingOptions": {
+          "fareType": [
+            "PUBLISHED"
+          ],
+          "includedCheckedBagsOnly": true
+        },
+        "validatingAirlineCodes": [
+          "SN"
+        ],
+        "travelerPricings": [
+          {
+            "travelerId": "1",
+            "fareOption": "STANDARD",
+            "travelerType": "ADULT",
+            "price": {
+              "currency": "EUR",
+              "total": "598.78",
+              "base": "189.00"
+            },
+            "fareDetailsBySegment": [
+              {
+                "segmentId": "18",
+                "cabin": "ECONOMY",
+                "fareBasis": "KX3XIYNC",
+                "brandedFare": "ECOSAVER",
+                "brandedFareLabel": "ECONOMY SAVER",
+                "class": "K",
+                "includedCheckedBags": {
+                  "quantity": 1
+                },
+                "includedCabinBags": {
+                  "quantity": 1
+                },
+                "amenities": [
+                  {
+                    "description": "CATERING ON EUROPE FLTS",
+                    "isChargeable": true,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "CATERING ON INTERCONT FLTS",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "STANDARD SEAT RESERVATION",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MILEAGE ACCRUAL",
+                    "isChargeable": false,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "UPGRADE ELIGIBILITY",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "PREFERRED SEAT RESERVATION",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "CHANGE BEFORE DEPARTURE",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  }
+                ]
+              },
+              {
+                "segmentId": "19",
+                "cabin": "ECONOMY",
+                "fareBasis": "KX3XIYNC",
+                "brandedFare": "ECOSAVER",
+                "brandedFareLabel": "ECONOMY SAVER",
+                "class": "K",
+                "includedCheckedBags": {
+                  "quantity": 1
+                },
+                "includedCabinBags": {
+                  "quantity": 1
+                },
+                "amenities": [
+                  {
+                    "description": "CATERING ON EUROPE FLTS",
+                    "isChargeable": true,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "CATERING ON INTERCONT FLTS",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "STANDARD SEAT RESERVATION",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MILEAGE ACCRUAL",
+                    "isChargeable": false,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "UPGRADE ELIGIBILITY",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "PREFERRED SEAT RESERVATION",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "CHANGE BEFORE DEPARTURE",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  }
+                ]
+              },
+              {
+                "segmentId": "61",
+                "cabin": "ECONOMY",
+                "fareBasis": "KX3XIYNC",
+                "brandedFare": "ECOSAVER",
+                "brandedFareLabel": "ECONOMY SAVER",
+                "class": "K",
+                "includedCheckedBags": {
+                  "quantity": 1
+                },
+                "includedCabinBags": {
+                  "quantity": 1
+                },
+                "amenities": [
+                  {
+                    "description": "CATERING ON EUROPE FLTS",
+                    "isChargeable": true,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "CATERING ON INTERCONT FLTS",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "STANDARD SEAT RESERVATION",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MILEAGE ACCRUAL",
+                    "isChargeable": false,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "UPGRADE ELIGIBILITY",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "PREFERRED SEAT RESERVATION",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "CHANGE BEFORE DEPARTURE",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  }
+                ]
+              },
+              {
+                "segmentId": "62",
+                "cabin": "ECONOMY",
+                "fareBasis": "KX3XIYNC",
+                "brandedFare": "ECOSAVER",
+                "brandedFareLabel": "ECONOMY SAVER",
+                "class": "K",
+                "includedCheckedBags": {
+                  "quantity": 1
+                },
+                "includedCabinBags": {
+                  "quantity": 1
+                },
+                "amenities": [
+                  {
+                    "description": "CATERING ON EUROPE FLTS",
+                    "isChargeable": true,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "CATERING ON INTERCONT FLTS",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "STANDARD SEAT RESERVATION",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MILEAGE ACCRUAL",
+                    "isChargeable": false,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "UPGRADE ELIGIBILITY",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "PREFERRED SEAT RESERVATION",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "CHANGE BEFORE DEPARTURE",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "travelers": [
+      {
+        "id": "1",
+        "dateOfBirth": "1997-09-17",
+        "name": {
+          "firstName": "Esmond",
+          "lastName": "Abban"
+        },
+        "gender": "MALE",
+        "contact": {
+          "emailAddress": "esmondabban3@gmail.com",
+          "phones": [
+            {
+              "deviceType": "MOBILE",
+              "countryCallingCode": "1",
+              "number": "0597332178"
+            }
+          ]
+        },
+        "documents": [
+          {
+            "documentType": "PASSPORT",
+            "number": "A0140077",
+            "expiryDate": "2032-02-10",
+            "issuanceCountry": "GH",
+            "nationality": "GH",
+            "holder": true
+          }
+        ]
+      }
+    ]
+  }
+}

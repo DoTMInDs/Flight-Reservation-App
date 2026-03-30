@@ -1,0 +1,338 @@
+<!-- templates/core/booking_form.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Passenger Details - FlightReserve{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Flight Summary -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Flight Details</h2>
+            
+            <div class="border rounded-lg p-6 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold">{{ flight.airline }}</h3>
+                        <p class="text-gray-600">{{ flight.flight_number }} • {{ flight.travel_class }}</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-blue-600">
+                            {{ flight.currency }} {{ flight.price }}
+                        </div>
+                        <p class="text-sm text-gray-500">Total for all passengers</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-2xl font-bold">{{ flight.departure_time|slice:"11:16" }}</div>
+                        <div class="text-gray-600">{{ flight.origin }}</div>
+                        <div class="text-sm text-gray-500">{{ flight.departure_time|slice:10 }}</div>
+                    </div>
+                    
+                    <div class="flex-1 mx-8 text-center">
+                        <div class="relative">
+                            <div class="border-t-2 border-gray-300 w-full"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="bg-white px-4 py-1 text-gray-600">{{ flight.duration }}</span>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500 mt-2">
+                            {% if flight.stops == 0 %}
+                            Non-stop
+                            {% else %}
+                            {{ flight.stops }} stop{{ flight.stops|pluralize }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="text-right">
+                        <div class="text-2xl font-bold">{{ flight.arrival_time|slice:"11:16" }}</div>
+                        <div class="text-gray-600">{{ flight.destination }}</div>
+                        <div class="text-sm text-gray-500">{{ flight.arrival_time|slice:10 }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-sm text-gray-600">
+                <p><i class="fas fa-info-circle text-blue-500 mr-2"></i>Your profile information will be used for booking.</p>
+                <p class="mt-2"><i class="fas fa-clock text-orange-500 mr-2"></i>Offer expires: {{ expires_at|timeuntil }}</p>
+            </div>
+        </div>
+        
+        <!-- Passenger Details Form -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Passenger Details</h2>
+            
+            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div class="flex items-center">
+                    <i class="fas fa-user-circle text-blue-500 text-xl mr-3"></i>
+                    <div>
+                        <h3 class="font-semibold text-blue-800">Using Your Profile Information</h3>
+                        <p class="text-sm text-blue-700">
+                            Your account details ({{ user_info.first_name }} {{ user_info.last_name }}) will be used as the primary passenger.
+                            <a href="{% url 'profile' %}" class="underline ml-1">Update profile</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Display User Information -->
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold mb-4">Primary Passenger (You)</h3>
+                <div class="border rounded-lg p-6 mb-4 bg-gray-50">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-500">Name</p>
+                            <p class="font-medium">{{ user_info.first_name }} {{ user_info.last_name }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Email</p>
+                            <p class="font-medium">{{ user_info.email }}</p>
+                        </div>
+                        {% if user_info.phone %}
+                        <div>
+                            <p class="text-sm text-gray-500">Phone</p>
+                            <p class="font-medium">{{ user_info.phone }}</p>
+                        </div>
+                        {% endif %}
+                        {% if user_info.date_of_birth %}
+                        <div>
+                            <p class="text-sm text-gray-500">Date of Birth</p>
+                            <p class="font-medium">{{ user_info.date_of_birth }}</p>
+                        </div>
+                        {% endif %}
+                        {% if user_info.passport_number %}
+                        <div>
+                            <p class="text-sm text-gray-500">Passport Number</p>
+                            <p class="font-medium">{{ user_info.passport_number }}</p>
+                        </div>
+                        {% endif %}
+                        {% if user_info.passport_expiry %}
+                        <div>
+                            <p class="text-sm text-gray-500">Passport Expiry</p>
+                            <p class="font-medium">{{ user_info.passport_expiry }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Additional Passengers Form -->
+            <form method="POST" action="{% url 'price_flight' %}" id="bookingForm">
+                {% csrf_token %}
+                
+                <!-- Hidden flight data -->
+                <input type="hidden" name="offer_id" value="{{ flight.id }}">
+                <input type="hidden" name="price" value="{{ flight.price }}">
+                <input type="hidden" name="offer_json" value="{{ flight.offer_data_json }}">
+                <input type="hidden" name="adults" value="1" id="adultCount">
+                
+                <!-- Additional Passengers (if any) -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">Additional Passengers</h3>
+                        <button type="button" id="addPassengerBtn" class="text-sm text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-plus mr-1"></i> Add Passenger
+                        </button>
+                    </div>
+                    
+                    <div id="additionalPassengers">
+                        <!-- Additional passengers will be added here dynamically -->
+                    </div>
+                </div>
+                
+                <!-- Contact Information (pre-filled from user profile) -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold mb-4">Contact Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Contact Email *</label>
+                            <input type="email" name="contact_email" value="{{ user.email }}" 
+                                   class="w-full px-4 py-2 border rounded-lg bg-gray-50" readonly>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Contact Phone *</label>
+                            <input type="tel" name="contact_phone" value="{{ user.phone_number|default:'5555555555' }}"
+                                class="w-full px-4 py-2 border rounded-lg" required
+                                pattern="[0-9]{10}" title="10-digit phone number without spaces or dashes">
+                            <p class="text-xs text-gray-500 mt-1">Format: 10 digits (e.g., 5555555555)</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Phone is required for booking confirmation and flight updates.
+                    </p>
+                </div>
+                
+                <!-- Terms and Submit -->
+                <div class="mb-6">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="terms" name="terms" class="h-4 w-4 text-blue-600" required>
+                        <label for="terms" class="ml-2 text-sm text-gray-700">
+                            I agree to the <a href="#" class="text-blue-600 hover:underline">Terms & Conditions</a> and 
+                            <a href="#" class="text-blue-600 hover:underline">Privacy Policy</a>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between">
+                    <a href="{% url 'flight_search_results' %}" 
+                       class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                        Back to Results
+                    </a>
+                    <button type="submit" 
+                            class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">
+                        Continue to Payment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Template for additional passenger -->
+<template id="passengerTemplate">
+    <div class="border rounded-lg p-6 mb-4 passenger-container">
+        <div class="flex justify-between items-center mb-4">
+            <h4 class="font-medium">Additional Passenger</h4>
+            <button type="button" class="text-red-500 hover:text-red-700 remove-passenger">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                <input type="text" name="adult_{index}_first_name" 
+                       class="w-full px-4 py-2 border rounded-lg" required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                <input type="text" name="adult_{index}_last_name" 
+                       class="w-full px-4 py-2 border rounded-lg" required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Date of Birth *</label>
+                <input type="date" name="adult_{index}_dob" 
+                       class="w-full px-4 py-2 border rounded-lg" required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Gender *</label>
+                <select name="adult_{index}_gender" class="w-full px-4 py-2 border rounded-lg" required>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <input type="email" name="adult_{index}_email" 
+                       class="w-full px-4 py-2 border rounded-lg">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                <input type="tel" name="adult_{index}_phone" 
+                       class="w-full px-4 py-2 border rounded-lg">
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let passengerCount = 1; // Starting from 1 since primary passenger is user
+    
+    const addPassengerBtn = document.getElementById('addPassengerBtn');
+    const additionalPassengers = document.getElementById('additionalPassengers');
+    const adultCountInput = document.getElementById('adultCount');
+    const passengerTemplate = document.getElementById('passengerTemplate');
+    
+    if (addPassengerBtn) {
+        addPassengerBtn.addEventListener('click', function() {
+            passengerCount++;
+            
+            // Clone the template
+            const newPassenger = passengerTemplate.content.cloneNode(true);
+            
+            // Update all input names with the current index
+            const inputs = newPassenger.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                const name = input.getAttribute('name');
+                if (name) {
+                    input.setAttribute('name', name.replace('{index}', passengerCount));
+                }
+            });
+            
+            // Add remove functionality
+            const removeBtn = newPassenger.querySelector('.remove-passenger');
+            removeBtn.addEventListener('click', function() {
+                this.closest('.passenger-container').remove();
+                passengerCount--;
+                updateAdultCount();
+            });
+            
+            // Append to container
+            additionalPassengers.appendChild(newPassenger);
+            
+            // Update hidden adult count
+            updateAdultCount();
+        });
+    }
+    
+    // Add event delegation for dynamically added remove buttons
+    additionalPassengers.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-passenger')) {
+            e.target.closest('.passenger-container').remove();
+            passengerCount--;
+            updateAdultCount();
+        }
+    });
+    
+    function updateAdultCount() {
+        // Count includes the primary passenger (user) + additional passengers
+        adultCountInput.value = passengerCount;
+    }
+    
+    // Form validation
+    const form = document.getElementById('bookingForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Validate contact phone
+            const contactPhone = document.querySelector('input[name="contact_phone"]');
+            if (!contactPhone.value.trim()) {
+                e.preventDefault();
+                alert('Please provide a contact phone number.');
+                contactPhone.focus();
+                return false;
+            }
+            
+            // Validate terms
+            const terms = document.getElementById('terms');
+            if (!terms.checked) {
+                e.preventDefault();
+                alert('Please agree to the Terms & Conditions');
+                terms.focus();
+                return false;
+            }
+            
+            // Validate additional passengers (if any)
+            const additionalPassengerContainers = document.querySelectorAll('.passenger-container');
+            for (let container of additionalPassengerContainers) {
+                const requiredFields = container.querySelectorAll('[required]');
+                for (let field of requiredFields) {
+                    if (!field.value.trim()) {
+                        e.preventDefault();
+                        alert('Please fill in all required fields for additional passengers.');
+                        field.focus();
+                        return false;
+                    }
+                }
+            }
+            
+            return true;
+        });
+    }
+});
+</script>
+{% endblock %}

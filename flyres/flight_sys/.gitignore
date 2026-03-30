@@ -1,0 +1,12 @@
+.venv/
+media/
+# .env*
+.qodo/
+db.sqlite3
+.qodo
+
+staticfiles
+__pycache__/
+# Ignore Python cache files
+*.py[cod]
+node_modules

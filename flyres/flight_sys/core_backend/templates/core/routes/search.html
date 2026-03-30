@@ -1,0 +1,1049 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-sky-50 via-white to-indigo-50 py-8 px-4">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                Find Your Perfect <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Flight</span>
+            </h1>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                Search and compare flights across hundreds of airlines to find the best deals
+            </p>
+        </div>
+
+        <!-- Main Search Card -->
+        <div class="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl shadow-blue-100/50 border border-white/60 p-6 md:p-8 mb-8">
+            <form method="GET" action="{% url 'flight_search_results' %}" id="flightSearchForm">
+                {% csrf_token %}
+                
+                <!-- Trip Type - Modern Toggle -->
+                <div class="mb-8">
+                    <div class="inline-flex items-center bg-gray-100/80 p-1.5 rounded-2xl">
+                        <button type="button" onclick="setTripType('oneway')" 
+                                id="onewayBtn" 
+                                class="flex-1 py-3 px-6 text-center font-semibold rounded-xl transition-all duration-300 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md">
+                            <i class="fas fa-plane-departure mr-2"></i>
+                            One Way
+                        </button>
+                        <button type="button" onclick="setTripType('roundtrip')" 
+                                id="roundtripBtn" 
+                                class="flex-1 py-3 px-6 text-nowrap text-center font-semibold rounded-xl transition-all duration-300 text-gray-700 hover:text-blue-700 bg-transparent">
+                            <i class="fas fa-exchange-alt mr-2"></i>
+                            Round Trip
+                        </button>
+                    </div>
+                    <input type="hidden" name="trip_type" id="tripType" value="oneway">
+                </div>
+
+                {% if detected_airport %}
+                <!-- Location Detection Card -->
+                <div class="mb-8 p-5 bg-gradient-to-r from-blue-50 to-indigo-50/50 border border-blue-100/50 rounded-2xl backdrop-blur-sm">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex items-start">
+                            <div class="p-3 bg-white rounded-xl shadow-sm mr-4">
+                                <i class="fas fa-location-dot text-blue-500 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 mb-1">Traveling from {{ detected_location.city }}?</h3>
+                                <p class="text-gray-600 text-sm mb-2">
+                                    We detected your location. Main airport: 
+                                    <span class="font-semibold text-blue-700">{{ detected_airport.code }} - {{ detected_airport.name }}</span>
+                                </p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button" 
+                                            onclick="useDetectedAirport('{{ detected_airport.code }}', '{{ detected_airport.name }}')"
+                                            class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-lg hover:shadow-md transition-all duration-300 transform hover:-translate-y-0.5">
+                                        <i class="fas fa-check mr-2"></i>Use This Airport
+                                    </button>
+                                    
+                                    {% if nearest_airports %}
+                                    <div class="relative group">
+                                        <button type="button"
+                                                class="px-4 py-2 bg-white/80 border border-blue-200 text-blue-700 text-sm font-medium rounded-lg hover:bg-white transition-all">
+                                            Other Options
+                                        </button>
+                                        <div class="absolute left-0 mt-2 w-60 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-xl shadow-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                                            <p class="text-xs text-gray-500 font-medium mb-2">Nearby airports:</p>
+                                            <div class="space-y-1">
+                                                {% for airport in nearest_airports %}
+                                                <button type="button"
+                                                        onclick="useAirport('{{ airport.code }}', '{{ airport.name }}', '{{ airport.city }}')"
+                                                        class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-between">
+                                                    <div>
+                                                        <span class="font-medium text-gray-900">{{ airport.code }}</span>
+                                                        <span class="text-gray-600 ml-2">{{ airport.city }}</span>
+                                                    </div>
+                                                    <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                                                </button>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Airport Selection Section -->
+                <div class="relative mb-8">
+                    <!-- Swap Button (Floating) -->
+                    <button type="button" onclick="swapAirports()" 
+                            class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center">
+                        <i class="fas fa-arrow-right-arrow-left text-lg"></i>
+                    </button>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Origin -->
+                        <div class="relative">
+                            <div class="absolute -top-3 left-4 px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
+                                FROM
+                            </div>
+                            <div class="bg-gradient-to-br from-white to-blue-50/50 border-2 border-blue-100/50 rounded-2xl p-5 pt-7 hover:border-blue-300/50 transition-colors duration-300">
+                                <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                    <i class="fas fa-plane-departure text-blue-500 mr-2"></i>
+                                    Departure Airport
+                                </label>
+                                <div class="relative">
+                                    <input type="text" 
+                                           name="origin" 
+                                           id="originInput"
+                                           placeholder="City or airport code..."
+                                           class="w-full px-4 py-4 pl-12 bg-transparent text-gray-900 text-lg font-medium placeholder-gray-400 focus:outline-none"
+                                           required
+                                           autocomplete="off">
+                                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-blue-400 text-lg"></i>
+                                    <div id="originResults" class="hidden absolute z-20 w-full mt-2 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-xl shadow-2xl max-h-72 overflow-auto"></div>
+                                </div>
+                                <div class="mt-3 text-sm text-gray-500 flex items-center" id="originHelp">
+                                    <i class="fas fa-info-circle mr-2 text-blue-400"></i>
+                                    Enter airport code or city name
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Destination -->
+                        <div class="relative">
+                            <div class="absolute -top-3 left-4 px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-full">
+                                TO
+                            </div>
+                            <div class="bg-gradient-to-br from-white to-indigo-50/50 border-2 border-indigo-100/50 rounded-2xl p-5 pt-7 hover:border-indigo-300/50 transition-colors duration-300">
+                                <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                    <i class="fas fa-plane-arrival text-indigo-500 mr-2"></i>
+                                    Arrival Airport
+                                </label>
+                                <div class="relative">
+                                    <input type="text" 
+                                           name="destination" 
+                                           id="destinationInput"
+                                           placeholder="City or airport code..."
+                                           class="w-full px-4 py-4 pl-12 bg-transparent text-gray-900 text-lg font-medium placeholder-gray-400 focus:outline-none"
+                                           required
+                                           autocomplete="off">
+                                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-indigo-400 text-lg"></i>
+                                    <div id="destinationResults" class="hidden absolute z-20 w-full mt-2 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-xl shadow-2xl max-h-72 overflow-auto"></div>
+                                </div>
+                                <div class="mt-3 text-sm text-gray-500 flex items-center" id="destinationHelp">
+                                    <i class="fas fa-info-circle mr-2 text-indigo-400"></i>
+                                    Enter airport code or city name
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dates & Passengers -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Departure Date -->
+                    <div class="relative group">
+                        <div class="absolute -top-3 left-4 px-3 py-1 bg-sky-100 text-sky-700 text-xs font-semibold rounded-full">
+                            DEPARTURE
+                        </div>
+                        <div class="bg-gradient-to-br from-white to-sky-50/50 border-2 border-sky-100/50 rounded-2xl p-5 pt-7 hover:border-sky-300/50 transition-all duration-300 group-hover:shadow-md">
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                <i class="far fa-calendar text-sky-500 mr-2"></i>
+                                Departure Date
+                            </label>
+                            <input type="date" 
+                                   name="departure_date" 
+                                   id="departureDate"
+                                   min="{{ today }}"
+                                   max="{{ max_date }}"
+                                   class="w-full px-4 py-3 bg-transparent text-gray-900 font-medium rounded-lg focus:outline-none datepicker"
+                                   required>
+                        </div>
+                    </div>
+
+                    <!-- Return Date -->
+                    <div id="returnDateContainer" class="hidden relative group">
+                        <div class="absolute -top-3 left-4 px-3 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">
+                            RETURN
+                        </div>
+                        <div class="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 rounded-2xl p-5 pt-7 hover:border-purple-300/50 transition-all duration-300 group-hover:shadow-md">
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                <i class="far fa-calendar-check text-purple-500 mr-2"></i>
+                                Return Date
+                            </label>
+                            <input type="date" 
+                                   name="return_date" 
+                                   id="returnDate"
+                                   min="{{ today }}"
+                                   max="{{ max_date }}"
+                                   class="w-full px-4 py-3 bg-transparent text-gray-900 font-medium rounded-lg focus:outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Passengers & Class -->
+                    <div class="relative group col-span-1 lg:col-span-2">
+                        <div class="absolute -top-3 left-4 px-3 py-1 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full">
+                            TRAVELERS & CLASS
+                        </div>
+                        <div class="bg-gradient-to-br from-white to-amber-50/50 border-2 border-amber-100/50 rounded-2xl p-5 pt-7 hover:border-amber-300/50 transition-all duration-300 group-hover:shadow-md">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Passengers -->
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                        <i class="fas fa-users text-amber-500 mr-2"></i>
+                                        Passengers
+                                    </label>
+                                    <div class="relative">
+                                        <input type="text" 
+                                               id="passengerSummary"
+                                               value="1 Adult"
+                                               class="w-full px-4 py-3 pl-12 bg-white/50 border border-amber-200 text-gray-900 font-medium rounded-xl cursor-pointer hover:bg-white transition-colors"
+                                               readonly
+                                               onclick="togglePassengerModal()">
+                                        <i class="fas fa-user-friends absolute left-4 top-1/2 transform -translate-y-1/2 text-amber-500"></i>
+                                        <input type="hidden" name="adults" id="adultsInput" value="1">
+                                        <input type="hidden" name="children" id="childrenInput" value="0">
+                                        <input type="hidden" name="infants" id="infantsInput" value="0">
+                                    </div>
+                                </div>
+
+                                <!-- Travel Class -->
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                        <i class="fas fa-crown text-amber-500 mr-2"></i>
+                                        Travel Class
+                                    </label>
+                                    <select name="travel_class" 
+                                            class="w-full px-4 py-3 bg-white/50 border border-amber-200 text-gray-900 font-medium rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent appearance-none">
+                                        <option value="ECONOMY" class="py-2">✈️ Economy</option>
+                                        <option value="PREMIUM_ECONOMY" class="py-2">✨ Premium Economy</option>
+                                        <option value="BUSINESS" class="py-2">🌟 Business Class</option>
+                                        <option value="FIRST" class="py-2">👑 First Class</option>
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Button -->
+                <div class="text-center">
+                    <button type="submit"
+                            class="group relative inline-flex items-center justify-center px-10 py-5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white font-bold text-xl rounded-2xl shadow-2xl shadow-blue-500/30 hover:shadow-3xl hover:shadow-blue-600/40 transform hover:-translate-y-1 transition-all duration-500 overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                        <i class="fas fa-search mr-3 text-xl"></i>
+                        Search Flights
+                        <i class="fas fa-arrow-right ml-3 group-hover:translate-x-1 transition-transform duration-300"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Quick Destination Suggestions -->
+        <div class="bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl shadow-blue-100/50 border border-white/60 p-6 md:p-8">
+            <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                <i class="fas fa-bolt text-amber-500 mr-3"></i>
+                Popular Destinations
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <button type="button" onclick="setDestination('JFK')" class="p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/50 rounded-xl text-center hover:border-blue-300 hover:shadow-md transition-all duration-300 group">
+                    <div class="text-2xl mb-2">🇺🇸</div>
+                    <div class="font-semibold text-gray-900">New York</div>
+                    <div class="text-sm text-blue-600 font-medium">JFK</div>
+                </button>
+                <button type="button" onclick="setDestination('LHR')" class="p-4 bg-gradient-to-br from-red-50 to-red-100/50 border border-red-200/50 rounded-xl text-center hover:border-red-300 hover:shadow-md transition-all duration-300">
+                    <div class="text-2xl mb-2">🇬🇧</div>
+                    <div class="font-semibold text-gray-900">London</div>
+                    <div class="text-sm text-red-600 font-medium">LHR</div>
+                </button>
+                <button type="button" onclick="setDestination('CDG')" class="p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/50 rounded-xl text-center hover:border-blue-300 hover:shadow-md transition-all duration-300">
+                    <div class="text-2xl mb-2">🇫🇷</div>
+                    <div class="font-semibold text-gray-900">Paris</div>
+                    <div class="text-sm text-blue-600 font-medium">CDG</div>
+                </button>
+                <button type="button" onclick="setDestination('DXB')" class="p-4 bg-gradient-to-br from-green-50 to-green-100/50 border border-green-200/50 rounded-xl text-center hover:border-green-300 hover:shadow-md transition-all duration-300">
+                    <div class="text-2xl mb-2">🇦🇪</div>
+                    <div class="font-semibold text-gray-900">Dubai</div>
+                    <div class="text-sm text-green-600 font-medium">DXB</div>
+                </button>
+                <button type="button" onclick="setDestination('HND')" class="p-4 bg-gradient-to-br from-red-50 to-red-100/50 border border-red-200/50 rounded-xl text-center hover:border-red-300 hover:shadow-md transition-all duration-300">
+                    <div class="text-2xl mb-2">🇯🇵</div>
+                    <div class="font-semibold text-gray-900">Tokyo</div>
+                    <div class="text-sm text-red-600 font-medium">HND</div>
+                </button>
+                <button type="button" onclick="setDestination('SYD')" class="p-4 bg-gradient-to-br from-green-50 to-green-100/50 border border-green-200/50 rounded-xl text-center hover:border-green-300 hover:shadow-md transition-all duration-300">
+                    <div class="text-2xl mb-2">🇦🇺</div>
+                    <div class="font-semibold text-gray-900">Sydney</div>
+                    <div class="text-sm text-green-600 font-medium">SYD</div>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Passenger Selection Modal -->
+<div id="passengerModal" class="hidden fixed inset-0 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl w-full max-w-md animate-modalIn">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">Passenger Selection</h3>
+                <button onclick="togglePassengerModal()" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <i class="fas fa-times text-gray-400 text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-6">
+                <!-- Adults -->
+                <div class="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-blue-100/30 rounded-2xl">
+                    <div>
+                        <div class="font-bold text-gray-900 text-lg">Adults</div>
+                        <div class="text-sm text-gray-500">12 years and above</div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button type="button" onclick="updatePassengerCount('adults', -1)" 
+                                class="w-12 h-12 flex items-center justify-center bg-white border-2 border-blue-200 rounded-full hover:bg-blue-50 hover:border-blue-300 hover:shadow-sm transition-all">
+                            <i class="fas fa-minus text-blue-600"></i>
+                        </button>
+                        <span id="adultsCount" class="w-12 text-center text-2xl font-bold text-blue-700">1</span>
+                        <button type="button" onclick="updatePassengerCount('adults', 1)" 
+                                class="w-12 h-12 flex items-center justify-center bg-white border-2 border-blue-200 rounded-full hover:bg-blue-50 hover:border-blue-300 hover:shadow-sm transition-all">
+                            <i class="fas fa-plus text-blue-600"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Children -->
+                <div class="flex items-center justify-between p-4 bg-gradient-to-r from-indigo-50 to-indigo-100/30 rounded-2xl">
+                    <div>
+                        <div class="font-bold text-gray-900 text-lg">Children</div>
+                        <div class="text-sm text-gray-500">2-11 years</div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button type="button" onclick="updatePassengerCount('children', -1)" 
+                                class="w-12 h-12 flex items-center justify-center bg-white border-2 border-indigo-200 rounded-full hover:bg-indigo-50 hover:border-indigo-300 hover:shadow-sm transition-all">
+                            <i class="fas fa-minus text-indigo-600"></i>
+                        </button>
+                        <span id="childrenCount" class="w-12 text-center text-2xl font-bold text-indigo-700">0</span>
+                        <button type="button" onclick="updatePassengerCount('children', 1)" 
+                                class="w-12 h-12 flex items-center justify-center bg-white border-2 border-indigo-200 rounded-full hover:bg-indigo-50 hover:border-indigo-300 hover:shadow-sm transition-all">
+                            <i class="fas fa-plus text-indigo-600"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Infants -->
+                <div class="flex items-center justify-between p-4 bg-gradient-to-r from-amber-50 to-amber-100/30 rounded-2xl">
+                    <div>
+                        <div class="font-bold text-gray-900 text-lg">Infants</div>
+                        <div class="text-sm text-gray-500">Under 2 years</div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button type="button" onclick="updatePassengerCount('infants', -1)" 
+                                class="w-12 h-12 flex items-center justify-center bg-white border-2 border-amber-200 rounded-full hover:bg-amber-50 hover:border-amber-300 hover:shadow-sm transition-all">
+                            <i class="fas fa-minus text-amber-600"></i>
+                        </button>
+                        <span id="infantsCount" class="w-12 text-center text-2xl font-bold text-amber-700">0</span>
+                        <button type="button" onclick="updatePassengerCount('infants', 1)" 
+                                class="w-12 h-12 flex items-center justify-center bg-white border-2 border-amber-200 rounded-full hover:bg-amber-50 hover:border-amber-300 hover:shadow-sm transition-all">
+                            <i class="fas fa-plus text-amber-600"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 flex justify-end space-x-3">
+                <button type="button" onclick="togglePassengerModal()"
+                        class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all">
+                    Cancel
+                </button>
+                <button type="button" onclick="savePassengerSelection()"
+                        class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all">
+                    Apply Selection
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Airport Search Functionality-->
+<script>
+    // Quick destination setter
+    function setDestination(airportCode) {
+        const destinationInput = document.getElementById('destinationInput');
+        if (destinationInput) {
+            destinationInput.value = airportCode;
+            destinationInput.focus();
+        }
+    }
+
+    // Airport Search Functionality
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Search airports from API
+    async function searchAirports(query, resultsContainer, helpElement, inputElement) {
+        if (query.length < 2) {
+            resultsContainer.classList.add('hidden');
+            helpElement.textContent = 'Enter at least 2 characters';
+            return;
+        }
+        
+        helpElement.textContent = 'Searching...';
+        resultsContainer.innerHTML = '';
+        resultsContainer.classList.remove('hidden');
+        
+        try {
+            const response = await fetch(`{% url 'search_airports' %}?q=${encodeURIComponent(query)}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.airports && data.airports.length > 0) {
+                resultsContainer.innerHTML = '';
+                
+                data.airports.forEach(airport => {
+                    const div = document.createElement('div');
+                    div.className = 'px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0';
+                    div.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="font-medium">${airport.code} - ${airport.name}</div>
+                                <div class="text-sm text-gray-500">${airport.city}</div>
+                            </div>
+                            <i class="fas fa-plane text-blue-500"></i>
+                        </div>
+                    `;
+                    
+                    div.addEventListener('click', () => {
+                        inputElement.value = airport.code;
+                        helpElement.textContent = `${airport.name}, ${airport.city}`;
+                        resultsContainer.classList.add('hidden');
+                        
+                        // Auto-focus next field if origin is filled
+                        if (inputElement.id === 'originInput' && document.getElementById('destinationInput').value === '') {
+                            document.getElementById('destinationInput').focus();
+                        }
+                    });
+                    
+                    resultsContainer.appendChild(div);
+                });
+                
+                helpElement.textContent = `${data.airports.length} airport(s) found`;
+            } else {
+                resultsContainer.innerHTML = `
+                    <div class="px-4 py-3 text-gray-500 text-center">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        No airports found
+                    </div>
+                `;
+                helpElement.textContent = 'No airports found. Try another search.';
+            }
+            
+        } catch (error) {
+            console.error('Airport search error:', error);
+            resultsContainer.innerHTML = `
+                <div class="px-4 py-3 text-red-500 text-center">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Search failed. Please try again.
+                </div>
+            `;
+            helpElement.textContent = 'Search failed. Please try again.';
+        }
+    }
+
+    // Initialize airport search when DOM loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const originInput = document.getElementById('originInput');
+        const destinationInput = document.getElementById('destinationInput');
+        const originResults = document.getElementById('originResults');
+        const destinationResults = document.getElementById('destinationResults');
+        const originHelp = document.getElementById('originHelp');
+        const destinationHelp = document.getElementById('destinationHelp');
+        
+        if (originInput) {
+            // Debounced search for better performance
+            const debouncedOriginSearch = debounce((query) => {
+                searchAirports(query, originResults, originHelp, originInput);
+            }, 300);
+            
+            originInput.addEventListener('input', (e) => {
+                debouncedOriginSearch(e.target.value);
+            });
+            
+            originInput.addEventListener('focus', () => {
+                if (originInput.value.length >= 2) {
+                    searchAirports(originInput.value, originResults, originHelp, originInput);
+                }
+            });
+            
+            // Close results when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!originInput.contains(e.target) && !originResults.contains(e.target)) {
+                    originResults.classList.add('hidden');
+                }
+            });
+        }
+        
+        if (destinationInput) {
+            // Debounced search for better performance
+            const debouncedDestinationSearch = debounce((query) => {
+                searchAirports(query, destinationResults, destinationHelp, destinationInput);
+            }, 300);
+            
+            destinationInput.addEventListener('input', (e) => {
+                debouncedDestinationSearch(e.target.value);
+            });
+            
+            destinationInput.addEventListener('focus', () => {
+                if (destinationInput.value.length >= 2) {
+                    searchAirports(destinationInput.value, destinationResults, destinationHelp, destinationInput);
+                }
+            });
+            
+            // Close results when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!destinationInput.contains(e.target) && !destinationResults.contains(e.target)) {
+                    destinationResults.classList.add('hidden');
+                }
+            });
+        }
+        
+        // Trip type switching - FIXED VERSION
+        window.setTripType = function(type) {
+            const onewayBtn = document.getElementById('onewayBtn');
+            const roundtripBtn = document.getElementById('roundtripBtn');
+            const returnDateContainer = document.getElementById('returnDateContainer');
+            const tripTypeInput = document.getElementById('tripType');
+            
+            tripTypeInput.value = type;
+            
+            if (type === 'oneway') {
+                // Set One Way as active
+                onewayBtn.classList.remove('bg-transparent', 'text-gray-700', 'hover:text-blue-700');
+                onewayBtn.classList.add('bg-gradient-to-r', 'from-blue-600', 'to-indigo-600', 'text-white', 'shadow-md');
+                
+                // Set Round Trip as inactive
+                roundtripBtn.classList.remove('bg-gradient-to-r', 'from-blue-600', 'to-indigo-600', 'text-white', 'shadow-md');
+                roundtripBtn.classList.add('bg-transparent', 'text-gray-700', 'hover:text-blue-700');
+                
+                // Hide return date
+                returnDateContainer.classList.add('hidden');
+            } else {
+                // Set Round Trip as active
+                roundtripBtn.classList.remove('bg-transparent', 'text-gray-700', 'hover:text-blue-700');
+                roundtripBtn.classList.add('bg-gradient-to-r', 'from-blue-600', 'to-indigo-600', 'text-white', 'shadow-md');
+                
+                // Set One Way as inactive
+                onewayBtn.classList.remove('bg-gradient-to-r', 'from-blue-600', 'to-indigo-600', 'text-white', 'shadow-md');
+                onewayBtn.classList.add('bg-transparent', 'text-gray-700', 'hover:text-blue-700');
+                
+                // Show return date
+                returnDateContainer.classList.remove('hidden');
+            }
+        };
+        
+        // Swap airports
+        window.swapAirports = function() {
+            const origin = originInput.value;
+            const originHelpText = originHelp.textContent;
+            const destination = destinationInput.value;
+            const destinationHelpText = destinationHelp.textContent;
+            
+            originInput.value = destination;
+            destinationInput.value = origin;
+            originHelp.textContent = destinationHelpText;
+            destinationHelp.textContent = originHelpText;
+        };
+        
+        // Passenger modal functions
+        let passengerCounts = {
+            adults: 1,
+            children: 0,
+            infants: 0
+        };
+        
+        window.togglePassengerModal = function() {
+            const modal = document.getElementById('passengerModal');
+            modal.classList.toggle('hidden');
+            
+            // Update modal counts to match current values
+            if (!modal.classList.contains('hidden')) {
+                document.getElementById('adultsCount').textContent = passengerCounts.adults;
+                document.getElementById('childrenCount').textContent = passengerCounts.children;
+                document.getElementById('infantsCount').textContent = passengerCounts.infants;
+            }
+        };
+        
+        window.updatePassengerCount = function(type, change) {
+            const countElement = document.getElementById(`${type}Count`);
+            let newCount = parseInt(countElement.textContent) + change;
+            
+            // Validation rules
+            if (type === 'adults') {
+                newCount = Math.max(1, Math.min(9, newCount));
+            } else if (type === 'children') {
+                newCount = Math.max(0, Math.min(8, newCount));
+            } else if (type === 'infants') {
+                // Infants cannot exceed adults
+                const adults = parseInt(document.getElementById('adultsCount').textContent);
+                newCount = Math.max(0, Math.min(adults, newCount));
+            }
+            
+            countElement.textContent = newCount;
+        };
+        
+        window.savePassengerSelection = function() {
+            passengerCounts.adults = parseInt(document.getElementById('adultsCount').textContent);
+            passengerCounts.children = parseInt(document.getElementById('childrenCount').textContent);
+            passengerCounts.infants = parseInt(document.getElementById('infantsCount').textContent);
+            
+            // Update hidden inputs
+            document.getElementById('adultsInput').value = passengerCounts.adults;
+            document.getElementById('childrenInput').value = passengerCounts.children;
+            document.getElementById('infantsInput').value = passengerCounts.infants;
+            
+            // Update summary text
+            let summary = `${passengerCounts.adults} Adult${passengerCounts.adults > 1 ? 's' : ''}`;
+            if (passengerCounts.children > 0) {
+                summary += `, ${passengerCounts.children} Child${passengerCounts.children > 1 ? 'ren' : ''}`;
+            }
+            if (passengerCounts.infants > 0) {
+                summary += `, ${passengerCounts.infants} Infant${passengerCounts.infants > 1 ? 's' : ''}`;
+            }
+            
+            document.getElementById('passengerSummary').value = summary;
+            togglePassengerModal();
+        };
+        
+        // Set today's date as default departure date
+        const today = new Date().toISOString().split('T')[0];
+        const departureDate = document.getElementById('departureDate');
+        if (departureDate && !departureDate.value) {
+            departureDate.value = today;
+        }
+        
+        // Set minimum return date based on departure date
+        if (departureDate) {
+            departureDate.addEventListener('change', function() {
+                const returnDate = document.getElementById('returnDate');
+                if (returnDate) {
+                    returnDate.min = this.value;
+                    if (returnDate.value && returnDate.value < this.value) {
+                        returnDate.value = this.value;
+                    }
+                }
+            });
+        }
+    });
+
+    // Add modern animations
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate elements on load
+        const elements = document.querySelectorAll('.bg-white\\/80');
+        elements.forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                el.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Trip type switching
+        const tripTypeButtons = document.querySelectorAll('.trip-type-btn');
+        const tripTypeInput = document.getElementById('trip_type');
+        const returnDateContainer = document.getElementById('returnDateContainer');
+        const returnDateInput = document.getElementById('return_date');
+        
+        tripTypeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const selectedType = this.dataset.tripType;
+                
+                // Update active tab styling
+                tripTypeButtons.forEach(btn => {
+                    btn.classList.remove('border-b-2', 'border-blue-600', 'text-blue-600');
+                    btn.classList.add('text-gray-600');
+                });
+                this.classList.remove('text-gray-600');
+                this.classList.add('border-b-2', 'border-blue-600', 'text-blue-600');
+                
+                // Update hidden input
+                tripTypeInput.value = selectedType;
+                
+                // Show/hide return date
+                if (selectedType === 'roundtrip') {
+                    returnDateContainer.classList.remove('hidden');
+                    returnDateContainer.classList.add('block');
+                    if (returnDateInput) {
+                        returnDateInput.required = true;
+                        // Set min date to departure date + 1 day
+                        const departureDate = document.getElementById('departure_date').value;
+                        if (departureDate) {
+                            const nextDay = new Date(departureDate);
+                            nextDay.setDate(nextDay.getDate() + 1);
+                            returnDateInput.min = nextDay.toISOString().split('T')[0];
+                        }
+                    }
+                } else {
+                    returnDateContainer.classList.remove('block');
+                    returnDateContainer.classList.add('hidden');
+                    if (returnDateInput) {
+                        returnDateInput.required = false;
+                        returnDateInput.value = '';
+                    }
+                }
+                
+                // Handle multi-city (you can expand this later)
+                if (selectedType === 'multicity') {
+                    // For now, just show an alert or implement multi-city form
+                    alert('Multi-city search will be implemented soon!');
+                    // You would show additional origin/destination/date fields here
+                }
+            });
+        });
+        
+        // Set initial state (one-way selected by default)
+        document.querySelector('[data-trip-type="oneway"]').click();
+        
+        // Airport autocomplete
+        const originInput = document.getElementById('origin');
+        const destinationInput = document.getElementById('destination');
+        const originSuggestions = document.getElementById('originSuggestions');
+        const destinationSuggestions = document.getElementById('destinationSuggestions');
+        
+        let airportSearchTimeout;
+        
+        function fetchAirports(query, inputElement, suggestionsContainer) {
+            if (query.length < 2) {
+                suggestionsContainer.classList.add('hidden');
+                return;
+            }
+            
+            clearTimeout(airportSearchTimeout);
+            
+            airportSearchTimeout = setTimeout(() => {
+                fetch(`/ajax/airports/search/?q=${encodeURIComponent(query)}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('Airport search error:', data.error);
+                        return;
+                    }
+                    
+                    if (data.airports && data.airports.length > 0) {
+                        suggestionsContainer.innerHTML = '';
+                        data.airports.forEach(airport => {
+                            const div = document.createElement('div');
+                            div.className = 'px-4 py-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0';
+                            div.innerHTML = `
+                                <div class="font-medium">${airport.code} - ${airport.name}</div>
+                                <div class="text-sm text-gray-600">${airport.city}, ${airport.country}</div>
+                            `;
+                            div.addEventListener('click', () => {
+                                inputElement.value = airport.code;
+                                suggestionsContainer.classList.add('hidden');
+                            });
+                            suggestionsContainer.appendChild(div);
+                        });
+                        suggestionsContainer.classList.remove('hidden');
+                    } else {
+                        suggestionsContainer.classList.add('hidden');
+                    }
+                })
+                .catch(error => {
+                    console.error('Airport search failed:', error);
+                    suggestionsContainer.classList.add('hidden');
+                });
+            }, 300);
+        }
+        
+        if (originInput) {
+            originInput.addEventListener('input', (e) => {
+                fetchAirports(e.target.value, originInput, originSuggestions);
+            });
+            
+            originInput.addEventListener('blur', () => {
+                setTimeout(() => {
+                    originSuggestions.classList.add('hidden');
+                }, 200);
+            });
+        }
+        
+        if (destinationInput) {
+            destinationInput.addEventListener('input', (e) => {
+                fetchAirports(e.target.value, destinationInput, destinationSuggestions);
+            });
+            
+            destinationInput.addEventListener('blur', () => {
+                setTimeout(() => {
+                    destinationSuggestions.classList.add('hidden');
+                }, 200);
+            });
+        }
+        
+        // Popular airport chips
+        document.querySelectorAll('.airport-chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                const airportCode = this.dataset.code;
+                
+                // Determine which input to fill based on which one is focused/empty
+                if (!originInput.value || document.activeElement === originInput) {
+                    originInput.value = airportCode;
+                    originInput.focus();
+                } else if (!destinationInput.value || document.activeElement === destinationInput) {
+                    destinationInput.value = airportCode;
+                    destinationInput.focus();
+                } else {
+                    // If both are filled, ask user
+                    if (confirm(`Set ${airportCode} as origin? Click OK for origin, Cancel for destination.`)) {
+                        originInput.value = airportCode;
+                    } else {
+                        destinationInput.value = airportCode;
+                    }
+                }
+            });
+        });
+        
+        // Set min date for return date based on departure date
+        const departureDateInput = document.getElementById('departure_date');
+        if (departureDateInput && returnDateInput) {
+            departureDateInput.addEventListener('change', function() {
+                if (this.value) {
+                    const nextDay = new Date(this.value);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    returnDateInput.min = nextDay.toISOString().split('T')[0];
+                    
+                    // If return date is before new min date, clear it
+                    if (returnDateInput.value && new Date(returnDateInput.value) < nextDay) {
+                        returnDateInput.value = '';
+                    }
+                }
+            });
+        }
+        
+        // Form validation
+        const searchForm = document.querySelector('form');
+            if (searchForm) {
+                searchForm.addEventListener('submit', function(e) {
+                    const tripType = tripTypeInput.value;
+                    const departureDate = departureDateInput.value;
+                    const returnDate = returnDateInput.value;
+                    
+                    // Validate dates for round trip
+                    if (tripType === 'roundtrip') {
+                        if (!returnDate) {
+                            e.preventDefault();
+                            alert('Please select a return date for round trip.');
+                            returnDateInput.focus();
+                            return;
+                        }
+                        
+                        if (new Date(returnDate) <= new Date(departureDate)) {
+                            e.preventDefault();
+                            alert('Return date must be after departure date.');
+                            returnDateInput.focus();
+                            return;
+                        }
+                    }
+                    
+                    // Clear return date if not round trip
+                    if (tripType !== 'roundtrip' && returnDateInput) {
+                        returnDateInput.value = '';
+                    }
+                });
+            }
+    });
+
+    // Add to your existing JavaScript
+    function useDetectedAirport(code, name) {
+        // Auto-fill the origin input
+        document.getElementById('originInput').value = code;
+        document.getElementById('originHelp').textContent = `${name} (Detected Location)`;
+        
+        // Focus on destination
+        setTimeout(() => {
+            document.getElementById('destinationInput').focus();
+        }, 100);
+    }
+
+    function useAirport(code, name, city) {
+        // Determine which field to fill
+        const originInput = document.getElementById('originInput');
+        const destinationInput = document.getElementById('destinationInput');
+        
+        if (!originInput.value) {
+            originInput.value = code;
+            document.getElementById('originHelp').textContent = `${name}, ${city}`;
+        } else if (!destinationInput.value) {
+            destinationInput.value = code;
+            document.getElementById('destinationHelp').textContent = `${name}, ${city}`;
+        } else {
+            // If both are filled, ask user
+            if (confirm(`Set ${code} as origin? Click OK for origin, Cancel for destination.`)) {
+                originInput.value = code;
+                document.getElementById('originHelp').textContent = `${name}, ${city}`;
+            } else {
+                destinationInput.value = code;
+                document.getElementById('destinationHelp').textContent = `${name}, ${city}`;
+            }
+        }
+    }
+
+    // Auto-detect and fill on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if we have a detected airport
+        const detectedAirportBtn = document.querySelector('[onclick^="useDetectedAirport"]');
+        if (detectedAirportBtn && !document.getElementById('originInput').value) {
+            // Auto-fill after 1 second delay
+            setTimeout(() => {
+                detectedAirportBtn.click();
+            }, 1000);
+        }
+    });
+</script>
+
+<style>
+    /* Modern Styling */
+    @keyframes modalIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .animate-modalIn {
+        animation: modalIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Custom datepicker styling */
+    .datepicker {
+        background: transparent;
+        border: none;
+        font-size: 1.125rem;
+        font-weight: 500;
+        color: #1f2937;
+        cursor: pointer;
+    }
+
+    .datepicker::-webkit-calendar-picker-indicator {
+        background: transparent;
+        color: transparent;
+        opacity: 0;
+        cursor: pointer;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+    }
+
+    .datepicker::after {
+        content: '📅';
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+    /* Custom select styling */
+    select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.5em;
+        padding-right: 2.5rem;
+    }
+
+    /* Smooth scroll for dropdowns */
+    #originResults::-webkit-scrollbar,
+    #destinationResults::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #originResults::-webkit-scrollbar-track,
+    #destinationResults::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 10px;
+    }
+
+    #originResults::-webkit-scrollbar-thumb,
+    #destinationResults::-webkit-scrollbar-thumb {
+        background: rgba(59, 130, 246, 0.5);
+        border-radius: 10px;
+    }
+
+    #originResults::-webkit-scrollbar-thumb:hover,
+    #destinationResults::-webkit-scrollbar-thumb:hover {
+        background: rgba(59, 130, 246, 0.8);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .grid {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .absolute.left-1\\/2 {
+            left: 50%;
+            transform: translateX(-50%);
+            top: auto;
+            bottom: -20px;
+            z-index: 10;
+        }
+        
+        .bg-white\\/80 {
+            padding: 1.5rem !important;
+        }
+    }
+</style>
+
+{% endblock %}
+

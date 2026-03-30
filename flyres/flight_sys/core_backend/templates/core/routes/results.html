@@ -1,0 +1,1592 @@
+<!-- templates/core/routes/results.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Flight Results - FlightReserve{% endblock %}
+
+{% block extra_css %}
+<style>
+    .flight-card {
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.5s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .segment-line {
+        position: relative;
+        flex: 1;
+        height: 2px;
+        background: #e5e7eb;
+        margin: 0 20px;
+    }
+    
+    .segment-line::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 12px;
+        height: 12px;
+        background: #3b82f6;
+        border-radius: 50%;
+    }
+    
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .badge.nonstop {
+        background: #dcfce7;
+        color: #166534;
+    }
+    
+    .badge.connecting {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    .badge.low-fare {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .price-highlight {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    /* Alternative date cards */
+    .alt-date-card {
+        transition: all 0.2s ease;
+    }
+    
+    .alt-date-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .date-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 8px;
+        font-size: 0.75rem;
+        border-radius: 9999px;
+        font-weight: 500;
+    }
+    
+    .date-chip.earlier {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+    
+    .date-chip.later {
+        background-color: #dbeafe;
+        color: #1e40af;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Search Summary & Actions -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <!-- Search Summary -->
+                <div>
+                    <div class="flex items-center mb-4">
+                        <div class="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-xl mr-4">
+                            <i class="fas fa-route text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">
+                                {{ search_params.origin }} → {{ search_params.destination }}
+                            </h1>
+                            <p class="text-gray-600 mt-1">
+                                {{ search_params.departure_date|date:"l, F j, Y" }}
+                                {% if search_params.return_date %}
+                                • Return: {{ search_params.return_date|date:"l, F j, Y" }}
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-3">
+                        <div class="flex items-center bg-gray-100 px-3 py-1.5 rounded-full text-sm">
+                            <i class="fas fa-users mr-2 text-blue-500"></i>
+                            {{ search_params.adults }} Adult{{ search_params.adults|pluralize }}
+                            {% if search_params.children > 0 %}
+                            , {{ search_params.children }} Child{{ search_params.children|pluralize }}
+                            {% endif %}
+                            {% if search_params.infants > 0 %}
+                            , {{ search_params.infants }} Infant{{ search_params.infants|pluralize }}
+                            {% endif %}
+                        </div>
+                        <div class="flex items-center bg-gray-100 px-3 py-1.5 rounded-full text-sm">
+                            <i class="fas fa-crown mr-2 text-blue-500"></i>
+                            {{ search_params.travel_class }}
+                        </div>
+                        {% if search_params.non_stop %}
+                        <div class="flex items-center bg-gray-100 px-3 py-1.5 rounded-full text-sm">
+                            <i class="fas fa-ban mr-2 text-blue-500"></i>
+                            Non-stop only
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <a href="{% url 'flight_search' %}" 
+                       class="inline-flex items-center justify-center px-5 py-2.5 border-2 border-blue-600 text-blue-600 hover:bg-blue-50 rounded-xl font-medium transition-colors whitespace-nowrap">
+                        <i class="fas fa-edit mr-2"></i>
+                        Modify Search
+                    </a>
+                    <button onclick="openFiltersModal()"
+                            class="inline-flex items-center justify-center px-5 py-2.5 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl font-medium transition-colors whitespace-nowrap">
+                        <i class="fas fa-filter mr-2"></i>
+                        Filters
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Results Summary -->
+            {% if search_summary %}
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center">
+                        {% if flights %}
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        <span class="text-gray-700">
+                            <span class="font-semibold">{{ search_summary.total_found }}</span> flights found
+                        </span>
+                        {% else %}
+                        <i class="fas fa-exclamation-circle text-amber-500 mr-2"></i>
+                        <span class="text-gray-700">
+                            No flights found for selected date
+                        </span>
+                        {% endif %}
+                        {% if search_summary.cached_at %}
+                        • Cached at {{ search_summary.cached_at }}
+                        {% endif %}
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        Currency: <span class="font-medium">{{ search_summary.currency }}</span>
+                        <span class="mx-2">•</span>
+                        Real-time pricing via Amadeus API
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ========== ALTERNATIVE DATES SECTION ========== -->
+        {% if show_retry_suggestions and alternative_dates %}
+        <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl shadow-lg p-6 mb-8">
+            <div class="flex flex-col md:flex-row md:items-start gap-6">
+                <div class="flex items-center md:w-1/4">
+                    <div class="flex items-center justify-center w-16 h-16 bg-amber-100 rounded-xl mr-4">
+                        <i class="fas fa-calendar-alt text-amber-600 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900">Try Alternative Dates</h2>
+                        <p class="text-sm text-amber-700 mt-1">No flights for {{ original_date }}</p>
+                    </div>
+                </div>
+                
+                <div class="md:w-3/4">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">
+                            {% if error_type == 'fare_rule' %}
+                            ✈️ Fare rules not met for {{ original_date }}
+                            {% elif error_type == 'sold_out' %}
+                            🎫 Flights sold out for {{ original_date }}
+                            {% else %}
+                            📅 No flights available for {{ original_date }}
+                            {% endif %}
+                        </h3>
+                        <p class="text-gray-600">
+                            {% if error_type == 'fare_rule' %}
+                            The selected dates don't meet airline fare requirements. Try adjusting by 1-2 days.
+                            {% elif error_type == 'sold_out' %}
+                            All flights are fully booked for this date. Try alternative dates for better availability.
+                            {% else %}
+                            There are no scheduled flights for your selected date. Try these alternative dates instead:
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                        {% for alt in alternative_dates %}
+                        <div class="alt-date-card bg-white rounded-xl border border-gray-200 p-4 text-center hover:border-blue-300">
+                            <div class="mb-2">
+                                <div class="text-2xl font-bold text-gray-900">
+                                    {{ alt.date|slice:"8:" }}/{{ alt.date|slice:"5:7" }}
+                                </div>
+                                <div class="text-sm text-gray-600">{{ alt.day_of_week|slice:":3" }}</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <span class="date-chip {% if alt.direction == 'earlier' %}earlier{% else %}later{% endif %}">
+                                    {% if alt.direction == 'earlier' %}
+                                    <i class="fas fa-arrow-left mr-1 text-xs"></i>
+                                    {% else %}
+                                    <i class="fas fa-arrow-right mr-1 text-xs"></i>
+                                    {% endif %}
+                                    {{ alt.offset }} day{{ alt.offset|pluralize }}
+                                </span>
+                            </div>
+                            
+                            <form method="get" action="{% url 'flight_search_results' %}">
+                                <input type="hidden" name="origin" value="{{ search_params.origin }}">
+                                <input type="hidden" name="destination" value="{{ search_params.destination }}">
+                                <input type="hidden" name="departure_date" value="{{ alt.date }}">
+                                {% if search_params.return_date %}
+                                <input type="hidden" name="return_date" value="{{ search_params.return_date }}">
+                                {% endif %}
+                                <input type="hidden" name="adults" value="{{ search_params.adults }}">
+                                <input type="hidden" name="children" value="{{ search_params.children|default:0 }}">
+                                <input type="hidden" name="infants" value="{{ search_params.infants|default:0 }}">
+                                <input type="hidden" name="travel_class" value="{{ search_params.travel_class|default:'ECONOMY' }}">
+                                
+                                <button type="submit" 
+                                        class="w-full inline-flex items-center justify-center px-3 py-2 bg-blue-50 text-blue-700 text-sm font-medium rounded-lg hover:bg-blue-100 transition-colors">
+                                    <i class="fas fa-search mr-2 text-xs"></i>
+                                    Search
+                                </button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Tips Section -->
+                    <div class="mt-6 pt-6 border-t border-amber-200">
+                        <div class="flex items-start">
+                            <i class="fas fa-lightbulb text-amber-500 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-medium text-gray-800 mb-2">💡 Tips for Finding Available Flights</h4>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li class="flex items-start">
+                                        <span class="text-amber-500 mr-2">•</span>
+                                        <span><strong>Mid-week flights</strong> (Tuesday-Thursday) often have better availability and lower prices</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-amber-500 mr-2">•</span>
+                                        <span><strong>Avoid weekends</strong> - Saturday/Sunday departures may have limited availability</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-amber-500 mr-2">•</span>
+                                        <span><strong>Be flexible</strong> - Even a 1-day adjustment can make a big difference</span>
+                                    </li>
+                                    {% if retry_attempt > 0 %}
+                                    <li class="flex items-start">
+                                        <span class="text-amber-500 mr-2">•</span>
+                                        <span>Already tried {{ retry_attempt }} alternative date{{ retry_attempt|pluralize }}</span>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <!-- ========== END ALTERNATIVE DATES SECTION ========== -->
+
+        <!-- Loading State -->
+        <div id="loading" class="hidden bg-white rounded-2xl shadow-lg p-12 text-center">
+            <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Searching for flights...</h3>
+            <p class="text-gray-600">Please wait while we fetch real-time availability from airlines</p>
+        </div>
+
+        <!-- Error State -->
+        {% if error and not show_retry_suggestions %}
+        <div class="bg-red-50 border-l-4 border-red-400 p-6 rounded-xl mb-8">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-red-400 text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-medium text-red-800">Search Error</h3>
+                    <div class="mt-2 text-red-700">
+                        <p>{{ error }}</p>
+                        <p class="mt-2 text-sm">
+                            Please try modifying your search criteria or try again later.
+                            {% if 'date' in error|lower %}
+                            <br><strong>Tip:</strong> Try selecting a different date or adjust by 1-2 days.
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="mt-4 flex flex-wrap gap-3">
+                        <a href="{% url 'flight_search' %}" 
+                           class="inline-flex items-center px-4 py-2 bg-red-100 border border-transparent rounded-md font-medium text-red-700 hover:bg-red-200 focus:outline-none">
+                            <i class="fas fa-redo mr-2"></i>
+                            Try Again
+                        </a>
+                        <a href="{% url 'home' %}" 
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md font-medium text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-home mr-2"></i>
+                            Return Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Results Container -->
+        <div id="resultsContainer">
+            {% if flights %}
+            <!-- Filters and Sorting -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex-1">
+                        <label for="sortBy" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-sort-amount-down mr-2"></i>Sort by:
+                        </label>
+                        <select id="sortBy" 
+                                class="w-full md:w-64 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white">
+                            <option value="price_asc">Price: Low to High</option>
+                            <option value="price_desc">Price: High to Low</option>
+                            <option value="duration_asc">Duration: Shortest</option>
+                            <option value="duration_desc">Duration: Longest</option>
+                            <option value="departure_asc">Departure: Earliest</option>
+                            <option value="departure_desc">Departure: Latest</option>
+                            <option value="stops_asc">Stops: Fewest</option>
+                            <option value="stops_desc">Stops: Most</option>
+                        </select>
+                    </div>
+                    
+                    <div class="text-right">
+                        <div class="text-sm text-gray-600">
+                            <span class="font-semibold text-blue-600">{{ total_flights }}</span> flight{{ total_flights|pluralize }} available
+                            {% if retry_attempt > 0 %}
+                            <span class="text-amber-600 ml-2">
+                                (Alternative date for {{ original_date }})
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            Prices include taxes & fees • Instant confirmation
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flight List -->
+            <div class="space-y-6" id="flightList">
+                {% for flight in flights %}
+                <div class="flight-card bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border-l-4 {% if flight.stops == 0 %}border-green-500{% else %}border-blue-500{% endif %}" 
+                     data-price="{{ flight.price.total }}" 
+                     data-duration="{{ flight.total_duration }}" 
+                     data-departure="{{ flight.departure_time|slice:'11:16' }}" 
+                     data-stops="{{ flight.stops }}"
+                     data-airline="{{ flight.validating_airline }}"
+                     data-price-numeric="{{ flight.price.total }}">
+                     
+                    <!-- Main Flight Info -->
+                    <div class="p-6">
+                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                            <!-- Airline & Flight Info -->
+                            <div class="lg:w-1/4">
+                                <div class="flex items-center">
+                                    <div class="flex items-center justify-center w-12 h-12 {% if flight.stops == 0 %}bg-green-100{% else %}bg-blue-100{% endif %} rounded-xl mr-4">
+                                        <i class="fas fa-plane {% if flight.stops == 0 %}text-green-600{% else %}text-blue-600{% endif %} text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-gray-900">{{ flight.validating_airline_name }}</h3>
+                                        <div class="flex items-center mt-1">
+                                            <span class="text-sm text-gray-500 mr-3">
+                                                Flight {{ flight.validating_airline }}{{ flight.itineraries.0.segments.0.number|default:'' }}
+                                            </span>
+                                            {% if flight.stops == 0 %}
+                                            <span class="badge nonstop">
+                                                <i class="fas fa-ban mr-1"></i>Non-stop
+                                            </span>
+                                            {% else %}
+                                            <span class="badge connecting">
+                                                <i class="fas fa-exchange-alt mr-1"></i>{{ flight.stops }} stop{{ flight.stops|pluralize }}
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Schedule -->
+                            <div class="lg:w-2/5">
+                                <div class="flex items-center">
+                                    <!-- Departure -->
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-gray-900">
+                                            {{ flight.departure_time|slice:"11:16" }}
+                                        </div>
+                                        <div class="text-sm text-gray-600 mt-1">
+                                            <span class="font-medium">{{ flight.origin }}</span>
+                                            <div class="text-xs text-gray-500">{{ flight.departure_time|slice:10 }}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Duration Line -->
+                                    <div class="flex-1 mx-6">
+                                        <div class="relative">
+                                            <div class="segment-line"></div>
+                                            <div class="absolute inset-0 flex items-center justify-center">
+                                                <div class="bg-white px-3 py-1 rounded-full border border-gray-300 shadow-sm">
+                                                    <span class="text-sm text-gray-600">{{ flight.formatted_duration|default:flight.duration|format_duration }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Arrival -->
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-gray-900">
+                                            {{ flight.arrival_time|slice:"11:16" }}
+                                        </div>
+                                        <div class="text-sm text-gray-600 mt-1">
+                                            <span class="font-medium">{{ flight.destination }}</span>
+                                            <div class="text-xs text-gray-500">{{ flight.arrival_time|slice:10 }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Operating Airlines -->
+                                {% if flight.airline_names|length > 1 %}
+                                <div class="mt-3 text-xs text-gray-500">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Operated by: {{ flight.airline_names|join:", " }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Price -->
+                            <div class="lg:w-1/5 text-center">
+                                <div class="mb-2">
+                                    <span class="text-3xl font-bold price-highlight">
+                                        {{ flight.price.currency }} {{ flight.price.total|floatformat:2 }}
+                                    </span>
+                                </div>
+                                <div class="text-sm text-gray-500">
+                                    {{ flight.travel_class }}
+                                    {% if flight.number_of_bookable_seats <= 5 %}
+                                    • <span class="text-red-600 font-medium">Only {{ flight.number_of_bookable_seats }} left</span>
+                                    {% else %}
+                                    • {{ flight.number_of_bookable_seats }} seats
+                                    {% endif %}
+                                </div>
+                                {% if flight.instant_ticketing_required %}
+                                <div class="mt-2 text-xs text-orange-600">
+                                    <i class="fas fa-bolt mr-1"></i>Instant ticketing required
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Select Button -->
+                            <div class="lg:w-1/5">
+                                <form method="POST" action="{% url 'select_flight' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="offer_id" value="{{ flight.id }}">
+                                    <input type="hidden" name="price" value="{{ flight.price.total }}">
+                                    <input type="hidden" name="offer_json" value="{{ flight.offer_json }}">
+                                    
+                                    <button type="submit" 
+                                            class="w-full inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r {% if flight.stops == 0 %}from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700{% else %}from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700{% endif %} text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                                        <span>Select Flight</span>
+                                        <i class="fas fa-arrow-right ml-2"></i>
+                                    </button>
+                                    
+                                    <div class="mt-3 text-center text-sm text-gray-500">
+                                        <i class="far fa-clock mr-1"></i>
+                                        Book by: {{ flight.last_ticketing_date|date:"M d, Y" }}
+                                        {% if flight.payment_card_required %}
+                                        <div class="text-xs text-orange-600 mt-1">
+                                            <i class="fas fa-credit-card mr-1"></i>Payment card required
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Flight Details Toggle -->
+                        <div class="mt-6 pt-6 border-t border-gray-200">
+                            <button onclick="toggleDetails('details{{ forloop.counter }}')"
+                                    class="flex items-center text-blue-600 hover:text-blue-800 font-medium">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                View Flight Details & Fare Rules
+                                <i class="fas fa-chevron-down ml-2 transition-transform duration-300" 
+                                   id="detailsIcon{{ forloop.counter }}"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Flight Details (Collapsible) -->
+                    <div id="details{{ forloop.counter }}" class="hidden px-6 pb-6 border-t border-gray-200 pt-6">
+                        <div class="bg-gray-50 rounded-xl p-6">
+                            <h4 class="font-semibold text-gray-900 mb-4 text-lg">Flight Details</h4>
+                            
+                            <!-- Itinerary -->
+                            <div class="space-y-4">
+                                {% for itinerary in flight.itineraries %}
+                                <div class="mb-6">
+                                    <div class="text-sm text-gray-500 mb-2">
+                                        {% if flight.itineraries|length > 1 %}
+                                        Segment {{ forloop.counter }}:
+                                        {% endif %}
+                                        Duration: {{ itinerary.duration|format_duration }}
+                                    </div>
+                                    
+                                    {% for segment in itinerary.segments %}
+                                    <div class="flex flex-col md:flex-row md:items-center justify-between p-4 bg-white rounded-lg border border-gray-200 mb-3">
+                                        <div class="mb-3 md:mb-0 md:w-1/4">
+                                            <div class="font-semibold text-gray-900 flex items-center">
+                                                <span>{{ segment.departure.iataCode }} → {{ segment.arrival.iataCode }}</span>
+                                            </div>
+                                            <div class="text-sm text-gray-500 mt-1">
+                                                {{ segment.carrierCode }}{{ segment.number }}
+                                                <span class="mx-2">•</span>
+                                                {{ segment.aircraft.code|default:"N/A" }}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3 md:mb-0 md:w-1/4">
+                                            <div class="text-sm text-gray-500">Departure</div>
+                                            <div class="font-medium">
+                                                {{ segment.departure.at|slice:"11:16" }}
+                                                <div class="text-xs text-gray-500">{{ segment.departure.at|slice:10 }}</div>
+                                            </div>
+                                            <div class="text-xs text-gray-500 mt-1">{{ segment.departure.terminal|default:"Terminal: N/A" }}</div>
+                                        </div>
+                                        
+                                        <div class="mb-3 md:mb-0 md:w-1/4">
+                                            <div class="text-sm text-gray-500">Arrival</div>
+                                            <div class="font-medium">
+                                                {{ segment.arrival.at|slice:"11:16" }}
+                                                <div class="text-xs text-gray-500">{{ segment.arrival.at|slice:10 }}</div>
+                                            </div>
+                                            <div class="text-xs text-gray-500 mt-1">{{ segment.arrival.terminal|default:"Terminal: N/A" }}</div>
+                                        </div>
+                                        
+                                        <div class="md:w-1/4">
+                                            <div class="text-sm text-gray-500">Duration</div>
+                                            <div class="font-medium">{{ segment.duration|format_duration }}</div>
+                                            <div class="text-xs text-gray-500 mt-1">{{ flight.travel_class }}</div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <!-- Fare Conditions -->
+                            <div class="mt-6 pt-6 border-t border-gray-200">
+                                <h5 class="font-medium text-gray-900 mb-3">Fare Conditions</h5>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="p-4 bg-white rounded-lg border border-gray-200">
+                                        <div class="text-sm text-gray-500 mb-1">Baggage</div>
+                                        <div class="font-medium text-gray-900">1 × 23kg checked</div>
+                                        <div class="text-xs text-gray-500 mt-1">1 × 7kg cabin</div>
+                                    </div>
+                                    <div class="p-4 bg-white rounded-lg border border-gray-200">
+                                        <div class="text-sm text-gray-500 mb-1">Cancellation</div>
+                                        <div class="font-medium text-gray-900">Fee applies</div>
+                                        <div class="text-xs text-gray-500 mt-1">Check airline policy</div>
+                                    </div>
+                                    <div class="p-4 bg-white rounded-lg border border-gray-200">
+                                        <div class="text-sm text-gray-500 mb-1">Changes</div>
+                                        <div class="font-medium text-gray-900">Allowed with fee</div>
+                                        <div class="text-xs text-gray-500 mt-1">Subject to availability</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Important Notes -->
+                            <div class="mt-6 pt-6 border-t border-gray-200">
+                                <div class="text-sm text-gray-600">
+                                    <i class="fas fa-exclamation-circle text-orange-500 mr-2"></i>
+                                    <strong>Important:</strong> Prices are per passenger and include all taxes & fees. 
+                                    Final price may vary based on passenger details. 
+                                    {{ flight.last_ticketing_date|date:"F d, Y" }} is the last day to ticket this fare.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- No Results State (hidden by default) -->
+            <div id="noResults" class="hidden bg-white rounded-2xl shadow-xl p-12 text-center">
+                <div class="inline-flex items-center justify-center w-24 h-24 bg-gray-100 rounded-full mb-6">
+                    <i class="fas fa-plane-slash text-gray-400 text-4xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-3">No Flights Match Your Filters</h3>
+                <p class="text-gray-600 mb-8 max-w-md mx-auto">
+                    Try adjusting your filters or search criteria to find available flights.
+                </p>
+                <button onclick="resetAllFilters()"
+                        class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+                    <i class="fas fa-redo mr-2"></i>
+                    Reset All Filters
+                </button>
+            </div>
+
+            {% elif not show_retry_suggestions %}
+            <!-- Initial No Results (when no flights and no alternative dates shown) -->
+            <div class="bg-white rounded-2xl shadow-xl p-12 text-center">
+                <div class="inline-flex items-center justify-center w-24 h-24 bg-gray-100 rounded-full mb-6">
+                    <i class="fas fa-plane-slash text-gray-400 text-4xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-3">No Flights Found</h3>
+                <p class="text-gray-600 mb-6 max-w-md mx-auto">
+                    {% if error %}
+                    {{ error }}
+                    {% else %}
+                    We couldn't find flights matching your criteria. Try adjusting your search parameters.
+                    {% endif %}
+                </p>
+                
+                <!-- Date Tips -->
+                <div class="max-w-lg mx-auto mb-8 text-left bg-blue-50 p-6 rounded-lg">
+                    <h4 class="font-semibold text-blue-800 mb-3">💡 Tips for Finding Flights</h4>
+                    <ul class="text-sm text-gray-700 space-y-2">
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2">✓</span>
+                            <span><strong>Try different dates</strong> - Even a 1-day difference can change availability</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2">✓</span>
+                            <span><strong>Check mid-week</strong> - Tuesday-Thursday often have more availability</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2">✓</span>
+                            <span><strong>Avoid weekends</strong> - Saturday/Sunday flights may be limited</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2">✓</span>
+                            <span><strong>Be flexible with airports</strong> - Nearby airports might have better options</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="{% url 'flight_search' %}" 
+                       class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+                        <i class="fas fa-search mr-2"></i>
+                        Try New Search
+                    </a>
+                    <a href="{% url 'home' %}" 
+                       class="inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-base font-medium rounded-xl text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-home mr-2"></i>
+                        Return Home
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Filters Modal -->
+{% include 'partials/filters_modal.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Sort functionality
+    initSorting();
+    
+    // Filter functionality
+    initFiltering();
+    
+    // Animate flight cards
+    animateFlightCards();
+    
+    // Highlight alternative dates if present
+    highlightAlternativeDates();
+});
+
+function initSorting() {
+    const sortSelect = document.getElementById('sortBy');
+    if (!sortSelect) return;
+    
+    sortSelect.addEventListener('change', function() {
+        const sortBy = this.value;
+        const flightCards = Array.from(document.querySelectorAll('.flight-card'));
+        
+        flightCards.sort(function(a, b) {
+            const aPrice = parseFloat(a.dataset.priceNumeric) || 0;
+            const bPrice = parseFloat(b.dataset.priceNumeric) || 0;
+            const aDuration = parseInt(a.dataset.duration) || 0;
+            const bDuration = parseInt(b.dataset.duration) || 0;
+            const aDeparture = a.dataset.departure || '00:00';
+            const bDeparture = b.dataset.departure || '00:00';
+            const aStops = parseInt(a.dataset.stops) || 0;
+            const bStops = parseInt(b.dataset.stops) || 0;
+            
+            switch(sortBy) {
+                case 'price_asc':
+                    return aPrice - bPrice;
+                case 'price_desc':
+                    return bPrice - aPrice;
+                case 'duration_asc':
+                    return aDuration - bDuration;
+                case 'duration_desc':
+                    return bDuration - aDuration;
+                case 'departure_asc':
+                    return aDeparture.localeCompare(bDeparture);
+                case 'departure_desc':
+                    return bDeparture.localeCompare(aDeparture);
+                case 'stops_asc':
+                    return aStops - bStops;
+                case 'stops_desc':
+                    return bStops - aStops;
+                default:
+                    return 0;
+            }
+        });
+        
+        const container = document.getElementById('flightList');
+        if (container) {
+            flightCards.forEach(card => {
+                container.appendChild(card);
+            });
+            
+            // Re-animate
+            animateFlightCards();
+        }
+    });
+}
+
+function initFiltering() {
+    // This would be connected to your filters modal
+    // Implement based on your filter requirements
+}
+
+function animateFlightCards() {
+    const flightCards = document.querySelectorAll('.flight-card');
+    flightCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.05}s`;
+        card.classList.add('animate-fade-in-up');
+    });
+}
+
+function toggleDetails(detailsId) {
+    const details = document.getElementById(detailsId);
+    if (!details) return;
+    
+    const isHidden = details.classList.contains('hidden');
+    
+    // Close all other details
+    document.querySelectorAll('[id^="details"]').forEach(detail => {
+        if (detail.id !== detailsId) {
+            detail.classList.add('hidden');
+            const iconId = `detailsIcon${detail.id.replace('details', '')}`;
+            const icon = document.getElementById(iconId);
+            if (icon) {
+                icon.classList.remove('rotate-180');
+            }
+        }
+    });
+    
+    // Toggle current details
+    details.classList.toggle('hidden');
+    
+    const iconId = `detailsIcon${detailsId.replace('details', '')}`;
+    const icon = document.getElementById(iconId);
+    if (icon) {
+        icon.classList.toggle('rotate-180');
+    }
+    
+    // Smooth scroll if opening
+    if (isHidden) {
+        setTimeout(() => {
+            details.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'nearest',
+                inline: 'nearest'
+            });
+        }, 100);
+    }
+}
+
+function highlightAlternativeDates() {
+    // Add hover effects to alternative date cards
+    const altDateCards = document.querySelectorAll('.alt-date-card');
+    altDateCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Add quick date picker functionality
+    const dateInput = document.querySelector('input[name="departure_date"]');
+    if (dateInput) {
+        altDateCards.forEach(card => {
+            const dateBtn = card.querySelector('button[type="submit"]');
+            if (dateBtn) {
+                card.addEventListener('click', function(e) {
+                    if (e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+                        // Simulate click on the button
+                        dateBtn.click();
+                    }
+                });
+            }
+        });
+    }
+}
+
+// Filters modal functions
+function openFiltersModal() {
+    // Implement modal opening
+    console.log('Open filters modal');
+}
+
+function resetAllFilters() {
+    // Implement filter reset
+    console.log('Reset all filters');
+}
+
+// Add CSS for animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fade-in-up {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate-fade-in-up {
+        animation: fade-in-up 0.5s ease-out forwards;
+    }
+    
+    .rotate-180 {
+        transform: rotate(180deg);
+        transition: transform 0.3s ease;
+    }
+`;
+document.head.appendChild(style);
+
+// Auto-expand first flight details if no flights were found initially
+{% if not flights and not show_retry_suggestions %}
+document.addEventListener('DOMContentLoaded', function() {
+    // Show date tips by default when no flights found
+    const dateTips = document.querySelector('.max-w-lg.mx-auto');
+    if (dateTips) {
+        dateTips.classList.remove('hidden');
+    }
+});
+{% endif %}
+</script>
+{% endblock %}
+
+{% comment %} 
+    <!-- templates/core/routes/results.html -->
+    {% extends 'base.html' %}
+    {% load static %}
+    {% load custom_filters %}
+    {% block title %}Flight Results - FlightReserve{% endblock %}
+
+    {% block extra_css %}
+    <style>
+        .flight-card {
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .segment-line {
+            position: relative;
+            flex: 1;
+            height: 2px;
+            background: #e5e7eb;
+            margin: 0 20px;
+        }
+        
+        .segment-line::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background: #3b82f6;
+            border-radius: 50%;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge.nonstop {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .badge.connecting {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .badge.low-fare {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .price-highlight {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+    {% endblock %}
+
+    {% block content %}
+    <div class="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Search Summary & Actions -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <!-- Search Summary -->
+                    <div>
+                        <div class="flex items-center mb-4">
+                            <div class="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-xl mr-4">
+                                <i class="fas fa-route text-blue-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">
+                                    {{ search_params.origin }} → {{ search_params.destination }}
+                                </h1>
+                                <p class="text-gray-600 mt-1">
+                                    {{ search_params.departure_date|date:"l, F j, Y" }}
+                                    {% if search_params.return_date %}
+                                    • Return: {{ search_params.return_date|date:"l, F j, Y" }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-3">
+                            <div class="flex items-center bg-gray-100 px-3 py-1.5 rounded-full text-sm">
+                                <i class="fas fa-users mr-2 text-blue-500"></i>
+                                {{ search_params.adults }} Adult{{ search_params.adults|pluralize }}
+                                {% if search_params.children > 0 %}
+                                , {{ search_params.children }} Child{{ search_params.children|pluralize }}
+                                {% endif %}
+                                {% if search_params.infants > 0 %}
+                                , {{ search_params.infants }} Infant{{ search_params.infants|pluralize }}
+                                {% endif %}
+                            </div>
+                            <div class="flex items-center bg-gray-100 px-3 py-1.5 rounded-full text-sm">
+                                <i class="fas fa-crown mr-2 text-blue-500"></i>
+                                {{ search_params.travel_class }}
+                            </div>
+                            {% if search_params.non_stop %}
+                            <div class="flex items-center bg-gray-100 px-3 py-1.5 rounded-full text-sm">
+                                <i class="fas fa-ban mr-2 text-blue-500"></i>
+                                Non-stop only
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <a href="{% url 'flight_search' %}" 
+                        class="inline-flex items-center justify-center px-5 py-2.5 border-2 border-blue-600 text-blue-600 hover:bg-blue-50 rounded-xl font-medium transition-colors whitespace-nowrap">
+                            <i class="fas fa-edit mr-2"></i>
+                            Modify Search
+                        </a>
+                        <button onclick="openFiltersModal()"
+                                class="inline-flex items-center justify-center px-5 py-2.5 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl font-medium transition-colors whitespace-nowrap">
+                            <i class="fas fa-filter mr-2"></i>
+                            Filters
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Results Summary -->
+                {% if search_summary %}
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                            <span class="text-gray-700">
+                                <span class="font-semibold">{{ search_summary.total_found }}</span> flights found
+                                {% if search_summary.cached_at %}
+                                • Cached at {{ search_summary.cached_at }}
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            Currency: <span class="font-medium">{{ search_summary.currency }}</span>
+                            <span class="mx-2">•</span>
+                            Real-time pricing via Amadeus API
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Loading State -->
+            <div id="loading" class="hidden bg-white rounded-2xl shadow-lg p-12 text-center">
+                <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Searching for flights...</h3>
+                <p class="text-gray-600">Please wait while we fetch real-time availability from airlines</p>
+            </div>
+
+            <!-- Error State -->
+            {% if error %}
+            <div class="bg-red-50 border-l-4 border-red-400 p-6 rounded-xl mb-8">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-red-400 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-medium text-red-800">Search Error</h3>
+                        <div class="mt-2 text-red-700">
+                            <p>{{ error }}</p>
+                            <p class="mt-2 text-sm">Please try modifying your search criteria or try again later.</p>
+                        </div>
+                        <div class="mt-4">
+                            <a href="{% url 'flight_search' %}" 
+                            class="inline-flex items-center px-4 py-2 bg-red-100 border border-transparent rounded-md font-medium text-red-700 hover:bg-red-200 focus:outline-none">
+                                <i class="fas fa-redo mr-2"></i>
+                                Try Again
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Results Container -->
+            <div id="resultsContainer">
+                {% if flights %}
+                <!-- Filters and Sorting -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex-1">
+                            <label for="sortBy" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-sort-amount-down mr-2"></i>Sort by:
+                            </label>
+                            <select id="sortBy" 
+                                    class="w-full md:w-64 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white">
+                                <option value="price_asc">Price: Low to High</option>
+                                <option value="price_desc">Price: High to Low</option>
+                                <option value="duration_asc">Duration: Shortest</option>
+                                <option value="duration_desc">Duration: Longest</option>
+                                <option value="departure_asc">Departure: Earliest</option>
+                                <option value="departure_desc">Departure: Latest</option>
+                                <option value="stops_asc">Stops: Fewest</option>
+                                <option value="stops_desc">Stops: Most</option>
+                            </select>
+                        </div>
+                        
+                        <div class="text-right">
+                            <div class="text-sm text-gray-600">
+                                <span class="font-semibold text-blue-600">{{ total_flights }}</span> flight{{ total_flights|pluralize }} available
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">
+                                Prices include taxes & fees • Instant confirmation
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flight List -->
+                <div class="space-y-6" id="flightList">
+                    {% for flight in flights %}
+                    <div class="flight-card bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border-l-4 {% if flight.stops == 0 %}border-green-500{% else %}border-blue-500{% endif %}" 
+                        data-price="{{ flight.price.total }}" 
+                        data-duration="{{ flight.total_duration }}" 
+                        data-departure="{{ flight.departure_time|slice:'11:16' }}" 
+                        data-stops="{{ flight.stops }}"
+                        data-airline="{{ flight.validating_airline }}"
+                        data-price-numeric="{{ flight.price.total }}">
+                        
+                        <!-- Main Flight Info -->
+                        <div class="p-6">
+                            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                                <!-- Airline & Flight Info -->
+                                <div class="lg:w-1/4">
+                                    <div class="flex items-center">
+                                        <div class="flex items-center justify-center w-12 h-12 {% if flight.stops == 0 %}bg-green-100{% else %}bg-blue-100{% endif %} rounded-xl mr-4">
+                                            <i class="fas fa-plane {% if flight.stops == 0 %}text-green-600{% else %}text-blue-600{% endif %} text-lg"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-gray-900">{{ flight.validating_airline_name }}</h3>
+                                            <div class="flex items-center mt-1">
+                                                <span class="text-sm text-gray-500 mr-3">
+                                                    Flight {{ flight.validating_airline }}{{ flight.itineraries.0.segments.0.number|default:'' }}
+                                                </span>
+                                                {% if flight.stops == 0 %}
+                                                <span class="badge nonstop">
+                                                    <i class="fas fa-ban mr-1"></i>Non-stop
+                                                </span>
+                                                {% else %}
+                                                <span class="badge connecting">
+                                                    <i class="fas fa-exchange-alt mr-1"></i>{{ flight.stops }} stop{{ flight.stops|pluralize }}
+                                                </span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Schedule -->
+                                <div class="lg:w-2/5">
+                                    <div class="flex items-center">
+                                        <!-- Departure -->
+                                        <div class="text-center">
+                                            <div class="text-2xl font-bold text-gray-900">
+                                                {{ flight.departure_time|slice:"11:16" }}
+                                            </div>
+                                            <div class="text-sm text-gray-600 mt-1">
+                                                <span class="font-medium">{{ flight.origin }}</span>
+                                                <div class="text-xs text-gray-500">{{ flight.departure_time|slice:10 }}</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Duration Line -->
+                                        <div class="flex-1 mx-6">
+                                            <div class="relative">
+                                                <div class="segment-line"></div>
+                                                <div class="absolute inset-0 flex items-center justify-center">
+                                                    <div class="bg-white px-3 py-1 rounded-full border border-gray-300 shadow-sm">
+                                                        <span class="text-sm text-gray-600">{{ flight.formatted_duration|default:flight.duration|format_duration }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Arrival -->
+                                        <div class="text-center">
+                                            <div class="text-2xl font-bold text-gray-900">
+                                                {{ flight.arrival_time|slice:"11:16" }}
+                                            </div>
+                                            <div class="text-sm text-gray-600 mt-1">
+                                                <span class="font-medium">{{ flight.destination }}</span>
+                                                <div class="text-xs text-gray-500">{{ flight.arrival_time|slice:10 }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Operating Airlines -->
+                                    {% if flight.airline_names|length > 1 %}
+                                    <div class="mt-3 text-xs text-gray-500">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        Operated by: {{ flight.airline_names|join:", " }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Price -->
+                                <div class="lg:w-1/5 text-center">
+                                    <div class="mb-2">
+                                        <span class="text-3xl font-bold price-highlight">
+                                            {{ flight.price.currency }} {{ flight.price.total|floatformat:2 }}
+                                        </span>
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        {{ flight.travel_class }}
+                                        {% if flight.number_of_bookable_seats <= 5 %}
+                                        • <span class="text-red-600 font-medium">Only {{ flight.number_of_bookable_seats }} left</span>
+                                        {% else %}
+                                        • {{ flight.number_of_bookable_seats }} seats
+                                        {% endif %}
+                                    </div>
+                                    {% if flight.instant_ticketing_required %}
+                                    <div class="mt-2 text-xs text-orange-600">
+                                        <i class="fas fa-bolt mr-1"></i>Instant ticketing required
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Select Button -->
+                                <div class="lg:w-1/5">
+                                    <form method="POST" action="{% url 'select_flight' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="offer_id" value="{{ flight.id }}">
+                                        <input type="hidden" name="price" value="{{ flight.price.total }}">
+                                        <input type="hidden" name="offer_json" value="{{ flight.offer_json }}">
+                                        
+                                        <button type="submit" 
+                                                class="w-full inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r {% if flight.stops == 0 %}from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700{% else %}from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700{% endif %} text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                                            <span>Select Flight</span>
+                                            <i class="fas fa-arrow-right ml-2"></i>
+                                        </button>
+                                        
+                                        <div class="mt-3 text-center text-sm text-gray-500">
+                                            <i class="far fa-clock mr-1"></i>
+                                            Book by: {{ flight.last_ticketing_date|date:"M d, Y" }}
+                                            {% if flight.payment_card_required %}
+                                            <div class="text-xs text-orange-600 mt-1">
+                                                <i class="fas fa-credit-card mr-1"></i>Payment card required
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Flight Details Toggle -->
+                            <div class="mt-6 pt-6 border-t border-gray-200">
+                                <button onclick="toggleDetails('details{{ forloop.counter }}')"
+                                        class="flex items-center text-blue-600 hover:text-blue-800 font-medium">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    View Flight Details & Fare Rules
+                                    <i class="fas fa-chevron-down ml-2 transition-transform duration-300" 
+                                    id="detailsIcon{{ forloop.counter }}"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Flight Details (Collapsible) -->
+                        <div id="details{{ forloop.counter }}" class="hidden px-6 pb-6 border-t border-gray-200 pt-6">
+                            <div class="bg-gray-50 rounded-xl p-6">
+                                <h4 class="font-semibold text-gray-900 mb-4 text-lg">Flight Details</h4>
+                                
+                                <!-- Itinerary -->
+                                <div class="space-y-4">
+                                    {% for itinerary in flight.itineraries %}
+                                    <div class="mb-6">
+                                        <div class="text-sm text-gray-500 mb-2">
+                                            {% if flight.itineraries|length > 1 %}
+                                            Segment {{ forloop.counter }}:
+                                            {% endif %}
+                                            Duration: {{ itinerary.duration|format_duration }}
+                                        </div>
+                                        
+                                        {% for segment in itinerary.segments %}
+                                        <div class="flex flex-col md:flex-row md:items-center justify-between p-4 bg-white rounded-lg border border-gray-200 mb-3">
+                                            <div class="mb-3 md:mb-0 md:w-1/4">
+                                                <div class="font-semibold text-gray-900 flex items-center">
+                                                    <span>{{ segment.departure.iataCode }} → {{ segment.arrival.iataCode }}</span>
+                                                </div>
+                                                <div class="text-sm text-gray-500 mt-1">
+                                                    {{ segment.carrierCode }}{{ segment.number }}
+                                                    <span class="mx-2">•</span>
+                                                    {{ segment.aircraft.code|default:"N/A" }}
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3 md:mb-0 md:w-1/4">
+                                                <div class="text-sm text-gray-500">Departure</div>
+                                                <div class="font-medium">
+                                                    {{ segment.departure.at|slice:"11:16" }}
+                                                    <div class="text-xs text-gray-500">{{ segment.departure.at|slice:10 }}</div>
+                                                </div>
+                                                <div class="text-xs text-gray-500 mt-1">{{ segment.departure.terminal|default:"Terminal: N/A" }}</div>
+                                            </div>
+                                            
+                                            <div class="mb-3 md:mb-0 md:w-1/4">
+                                                <div class="text-sm text-gray-500">Arrival</div>
+                                                <div class="font-medium">
+                                                    {{ segment.arrival.at|slice:"11:16" }}
+                                                    <div class="text-xs text-gray-500">{{ segment.arrival.at|slice:10 }}</div>
+                                                </div>
+                                                <div class="text-xs text-gray-500 mt-1">{{ segment.arrival.terminal|default:"Terminal: N/A" }}</div>
+                                            </div>
+                                            
+                                            <div class="md:w-1/4">
+                                                <div class="text-sm text-gray-500">Duration</div>
+                                                <div class="font-medium">{{ segment.duration|format_duration }}</div>
+                                                <div class="text-xs text-gray-500 mt-1">{{ flight.travel_class }}</div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <!-- Fare Conditions -->
+                                <div class="mt-6 pt-6 border-t border-gray-200">
+                                    <h5 class="font-medium text-gray-900 mb-3">Fare Conditions</h5>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div class="p-4 bg-white rounded-lg border border-gray-200">
+                                            <div class="text-sm text-gray-500 mb-1">Baggage</div>
+                                            <div class="font-medium text-gray-900">1 × 23kg checked</div>
+                                            <div class="text-xs text-gray-500 mt-1">1 × 7kg cabin</div>
+                                        </div>
+                                        <div class="p-4 bg-white rounded-lg border border-gray-200">
+                                            <div class="text-sm text-gray-500 mb-1">Cancellation</div>
+                                            <div class="font-medium text-gray-900">Fee applies</div>
+                                            <div class="text-xs text-gray-500 mt-1">Check airline policy</div>
+                                        </div>
+                                        <div class="p-4 bg-white rounded-lg border border-gray-200">
+                                            <div class="text-sm text-gray-500 mb-1">Changes</div>
+                                            <div class="font-medium text-gray-900">Allowed with fee</div>
+                                            <div class="text-xs text-gray-500 mt-1">Subject to availability</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Important Notes -->
+                                <div class="mt-6 pt-6 border-t border-gray-200">
+                                    <div class="text-sm text-gray-600">
+                                        <i class="fas fa-exclamation-circle text-orange-500 mr-2"></i>
+                                        <strong>Important:</strong> Prices are per passenger and include all taxes & fees. 
+                                        Final price may vary based on passenger details. 
+                                        {{ flight.last_ticketing_date|date:"F d, Y" }} is the last day to ticket this fare.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- No Results State (hidden by default) -->
+                <div id="noResults" class="hidden bg-white rounded-2xl shadow-xl p-12 text-center">
+                    <div class="inline-flex items-center justify-center w-24 h-24 bg-gray-100 rounded-full mb-6">
+                        <i class="fas fa-plane-slash text-gray-400 text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">No Flights Match Your Filters</h3>
+                    <p class="text-gray-600 mb-8 max-w-md mx-auto">
+                        Try adjusting your filters or search criteria to find available flights.
+                    </p>
+                    <button onclick="resetAllFilters()"
+                            class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+                        <i class="fas fa-redo mr-2"></i>
+                        Reset All Filters
+                    </button>
+                </div>
+
+                {% else %}
+                <!-- Initial No Results -->
+                <div class="bg-white rounded-2xl shadow-xl p-12 text-center">
+                    <div class="inline-flex items-center justify-center w-24 h-24 bg-gray-100 rounded-full mb-6">
+                        <i class="fas fa-plane-slash text-gray-400 text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">No Flights Found</h3>
+                    <p class="text-gray-600 mb-8 max-w-md mx-auto">
+                        We couldn't find flights matching your criteria. Try adjusting your search parameters.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="{% url 'flight_search' %}" 
+                        class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+                            <i class="fas fa-search mr-2"></i>
+                            Try New Search
+                        </a>
+                        <a href="{% url 'home' %}" 
+                        class="inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-base font-medium rounded-xl text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-home mr-2"></i>
+                            Return Home
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Modal -->
+    {% include 'partials/filters_modal.html' %}
+    {% endblock %}
+
+    {% block extra_js %}
+    <script>
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sort functionality
+        initSorting();
+        
+        // Filter functionality
+        initFiltering();
+        
+        // Animate flight cards
+        animateFlightCards();
+    });
+
+    function initSorting() {
+        const sortSelect = document.getElementById('sortBy');
+        if (!sortSelect) return;
+        
+        sortSelect.addEventListener('change', function() {
+            const sortBy = this.value;
+            const flightCards = Array.from(document.querySelectorAll('.flight-card'));
+            
+            flightCards.sort(function(a, b) {
+                const aPrice = parseFloat(a.dataset.priceNumeric) || 0;
+                const bPrice = parseFloat(b.dataset.priceNumeric) || 0;
+                const aDuration = parseInt(a.dataset.duration) || 0;
+                const bDuration = parseInt(b.dataset.duration) || 0;
+                const aDeparture = a.dataset.departure || '00:00';
+                const bDeparture = b.dataset.departure || '00:00';
+                const aStops = parseInt(a.dataset.stops) || 0;
+                const bStops = parseInt(b.dataset.stops) || 0;
+                
+                switch(sortBy) {
+                    case 'price_asc':
+                        return aPrice - bPrice;
+                    case 'price_desc':
+                        return bPrice - aPrice;
+                    case 'duration_asc':
+                        return aDuration - bDuration;
+                    case 'duration_desc':
+                        return bDuration - aDuration;
+                    case 'departure_asc':
+                        return aDeparture.localeCompare(bDeparture);
+                    case 'departure_desc':
+                        return bDeparture.localeCompare(aDeparture);
+                    case 'stops_asc':
+                        return aStops - bStops;
+                    case 'stops_desc':
+                        return bStops - aStops;
+                    default:
+                        return 0;
+                }
+            });
+            
+            const container = document.getElementById('flightList');
+            if (container) {
+                flightCards.forEach(card => {
+                    container.appendChild(card);
+                });
+                
+                // Re-animate
+                animateFlightCards();
+            }
+        });
+    }
+
+    function initFiltering() {
+        // This would be connected to your filters modal
+        // Implement based on your filter requirements
+    }
+
+    function animateFlightCards() {
+        const flightCards = document.querySelectorAll('.flight-card');
+        flightCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.05}s`;
+            card.classList.add('animate-fade-in-up');
+        });
+    }
+
+    function toggleDetails(detailsId) {
+        const details = document.getElementById(detailsId);
+        if (!details) return;
+        
+        const isHidden = details.classList.contains('hidden');
+        
+        // Close all other details
+        document.querySelectorAll('[id^="details"]').forEach(detail => {
+            if (detail.id !== detailsId) {
+                detail.classList.add('hidden');
+                const iconId = `detailsIcon${detail.id.replace('details', '')}`;
+                const icon = document.getElementById(iconId);
+                if (icon) {
+                    icon.classList.remove('rotate-180');
+                }
+            }
+        });
+        
+        // Toggle current details
+        details.classList.toggle('hidden');
+        
+        const iconId = `detailsIcon${detailsId.replace('details', '')}`;
+        const icon = document.getElementById(iconId);
+        if (icon) {
+            icon.classList.toggle('rotate-180');
+        }
+        
+        // Smooth scroll if opening
+        if (isHidden) {
+            setTimeout(() => {
+                details.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'nearest',
+                    inline: 'nearest'
+                });
+            }, 100);
+        }
+    }
+
+    // Filters modal functions
+    function openFiltersModal() {
+        // Implement modal opening
+        console.log('Open filters modal');
+    }
+
+    function resetAllFilters() {
+        // Implement filter reset
+        console.log('Reset all filters');
+    }
+
+    // Add CSS for animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fade-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in-up {
+            animation: fade-in-up 0.5s ease-out forwards;
+        }
+        
+        .rotate-180 {
+            transform: rotate(180deg);
+            transition: transform 0.3s ease;
+        }
+    `;
+    document.head.appendChild(style);
+    </script>
+    {% endblock %} 
+{% endcomment %}

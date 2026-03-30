@@ -1,0 +1,678 @@
+{% extends 'base.html' %}
+
+{% block title %}Complete Booking - FlightReserve{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Progress Steps -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+            <div class="max-w-4xl mx-auto">
+                <div class="relative flex items-center justify-between">
+                    <!-- Step 1: Search -->
+                    <div class="flex flex-col items-center relative z-10">
+                        <div class="flex items-center justify-center w-12 h-12 rounded-full bg-green-500 text-white shadow-lg mb-3">
+                            <i class="fas fa-check text-lg"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-900">Search</span>
+                    </div>
+                    
+                    <!-- Connecting Line -->
+                    <div class="flex-1 h-1 bg-green-500 mx-4"></div>
+                    
+                    <!-- Step 2: Select -->
+                    <div class="flex flex-col items-center relative z-10">
+                        <div class="flex items-center justify-center w-12 h-12 rounded-full bg-green-500 text-white shadow-lg mb-3">
+                            <i class="fas fa-check text-lg"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-900">Select</span>
+                    </div>
+                    
+                    <!-- Connecting Line -->
+                    <div class="flex-1 h-1 bg-green-500 mx-4"></div>
+                    
+                    <!-- Step 3: Passengers -->
+                    <div class="flex flex-col items-center relative z-10">
+                        <div class="flex items-center justify-center w-14 h-14 rounded-full bg-blue-600 text-white shadow-xl mb-3 border-4 border-white ring-4 ring-blue-100">
+                            <span class="text-lg font-bold">3</span>
+                        </div>
+                        <span class="text-sm font-semibold text-blue-600">Passengers</span>
+                    </div>
+                    
+                    <!-- Connecting Line -->
+                    <div class="flex-1 h-1 bg-gray-300 mx-4"></div>
+                    
+                    <!-- Step 4: Confirm -->
+                    <div class="flex flex-col items-center relative z-10">
+                        <div class="flex items-center justify-center w-12 h-12 rounded-full bg-gray-300 text-gray-500 shadow mb-3">
+                            <span class="text-sm font-medium">4</span>
+                        </div>
+                        <span class="text-sm font-medium text-gray-500">Confirm</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Flight Summary (Left Sidebar) -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-2xl shadow-xl sticky top-8 overflow-hidden border border-gray-200">
+                    <!-- Header -->
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5">
+                        <div class="flex items-center">
+                            <div class="flex items-center justify-center w-10 h-10 bg-white/20 rounded-xl mr-3">
+                                <i class="fas fa-ticket-alt text-white text-lg"></i>
+                            </div>
+                            <h2 class="text-xl font-bold text-white">Flight Summary</h2>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        {% with flight=selected_flight %}
+                        <!-- Route -->
+                        <div class="mb-6">
+                            <div class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Route</div>
+                            <div class="flex items-center">
+                                <div class="text-2xl font-bold text-gray-900">{{ flight.origin }}</div>
+                                <div class="mx-4">
+                                    <i class="fas fa-long-arrow-alt-right text-blue-500 text-xl"></i>
+                                </div>
+                                <div class="text-2xl font-bold text-gray-900">{{ flight.destination }}</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Departure -->
+                        <div class="mb-6">
+                            <div class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Departure</div>
+                            <div class="space-y-2">
+                                <div class="flex items-center text-gray-700">
+                                    <i class="far fa-calendar text-blue-500 w-5 mr-3"></i>
+                                    <span>{{ flight.departure_date|date:"l, F d, Y" }}</span>
+                                </div>
+                                <div class="flex items-center text-gray-700">
+                                    <i class="far fa-clock text-blue-500 w-5 mr-3"></i>
+                                    <span>{{ flight.departure_time|time:"g:i A" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Airline & Duration -->
+                        <div class="mb-6">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <div class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Airline</div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-plane text-blue-500 mr-2"></i>
+                                        <span class="font-medium">{{ flight.airline_name }}</span>
+                                    </div>
+                                    <div class="text-sm text-gray-500 mt-1">Flight {{ flight.flight_number }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Duration</div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-hourglass-half text-blue-500 mr-2"></i>
+                                        <span class="font-medium">{{ flight.duration }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Price Summary -->
+                        <div class="border-t border-gray-200 pt-6 mb-6">
+                            <div class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Price Summary</div>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Base Fare</span>
+                                    <span class="font-medium">${{ flight.price.base }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Taxes & Fees</span>
+                                    <span class="font-medium">${{ flight.price.taxes }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Service Fee</span>
+                                    <span class="font-medium">${{ flight.price.fees }}</span>
+                                </div>
+                                <div class="border-t border-gray-200 pt-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-lg font-semibold text-gray-900">Total</span>
+                                        <span class="text-2xl font-bold text-blue-600">${{ flight.price.total }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Important Notice -->
+                        <div class="bg-gradient-to-r from-yellow-50 to-amber-50 border-l-4 border-yellow-400 rounded-lg p-4">
+                            <div class="flex items-start">
+                                <i class="fas fa-exclamation-triangle text-yellow-500 mt-1 mr-3"></i>
+                                <div>
+                                    <div class="font-semibold text-yellow-700 mb-1">Ticketing Deadline</div>
+                                    <div class="text-sm text-yellow-600 mb-2">{{ flight.ticketing_deadline|date:"F d, Y g:i A" }}</div>
+                                    <div class="text-xs text-yellow-600">
+                                        Seats will be held for 24 hours only
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Passenger Forms (Main Content) -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <!-- Header -->
+                    <div class="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white px-8 py-6">
+                        <div class="flex items-center">
+                            <div class="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-xl mr-4">
+                                <i class="fas fa-users text-blue-600 text-xl"></i>
+                            </div>
+                            <h2 class="text-2xl font-bold text-gray-900">Passenger Details</h2>
+                        </div>
+                    </div>
+                    
+                    <form method="POST" action="{% url 'create_booking' %}" id="bookingForm" class="p-8">
+                        {% csrf_token %}
+                        <input type="hidden" name="offer_id" value="{{ selected_flight.id }}">
+                        <input type="hidden" name="flight_data" value="{{ flight_data_json }}">
+                        
+                        <!-- Contact Information -->
+                        <div class="mb-10">
+                            <div class="flex items-center mb-6">
+                                <div class="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg mr-3">
+                                    <i class="fas fa-address-card text-blue-600"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-900">Contact Information</h3>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Email -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Email Address <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-envelope text-gray-400"></i>
+                                        </div>
+                                        <input type="email" name="contact_email" 
+                                               value="{{ user.email }}"
+                                               class="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                               required>
+                                    </div>
+                                    <p class="mt-2 text-sm text-gray-500">Itinerary will be sent to this email</p>
+                                </div>
+                                
+                                <!-- Phone -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Phone Number <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-phone text-gray-400"></i>
+                                        </div>
+                                        <input type="tel" name="contact_phone"
+                                               class="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                               required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Passenger Forms -->
+                        {% for i in passenger_range %}
+                        <div class="passenger-form mb-8 p-6 bg-gradient-to-b from-gray-50 to-white border border-gray-200 rounded-xl">
+                            <div class="flex items-center mb-6">
+                                <div class="flex items-center justify-center w-10 h-10 bg-purple-100 rounded-lg mr-3">
+                                    <i class="fas fa-user text-purple-600"></i>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-900">
+                                    Passenger {{ i }} - {{ passenger_types|default:"Adult" }}
+                                </h3>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <!-- Title -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                                    <div class="relative">
+                                        <select name="title_{{ i }}"
+                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white">
+                                            <option value="MR">Mr.</option>
+                                            <option value="MRS">Mrs.</option>
+                                            <option value="MS">Ms.</option>
+                                            <option value="MISS">Miss</option>
+                                            <option value="DR">Dr.</option>
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <i class="fas fa-chevron-down text-gray-400"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- First Name -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        First Name <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" name="first_name_{{ i }}"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                           required>
+                                </div>
+                                
+                                <!-- Last Name -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Last Name <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" name="last_name_{{ i }}"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                           required>
+                                </div>
+                                
+                                <!-- Date of Birth -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Date of Birth <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-birthday-cake text-gray-400"></i>
+                                        </div>
+                                        <input type="date" name="dob_{{ i }}"
+                                               class="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                               required>
+                                    </div>
+                                </div>
+                                
+                                <!-- Gender -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Gender <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <select name="gender_{{ i }}"
+                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
+                                                required>
+                                            <option value="MALE">Male</option>
+                                            <option value="FEMALE">Female</option>
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                            <i class="fas fa-chevron-down text-gray-400"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Passport Information -->
+                            <div class="mt-6 pt-6 border-t border-gray-200">
+                                <div class="flex items-center mb-4">
+                                    <input type="checkbox" name="has_passport_{{ i }}" 
+                                           id="passportCheck{{ i }}"
+                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                    <label for="passportCheck{{ i }}" class="ml-2 text-sm text-gray-700">
+                                        Add passport information (optional)
+                                    </label>
+                                </div>
+                                
+                                <div id="passportFields{{ i }}" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                                    <!-- Passport Number -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                            Passport Number
+                                        </label>
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <i class="fas fa-passport text-gray-400"></i>
+                                            </div>
+                                            <input type="text" name="passport_number_{{ i }}"
+                                                   class="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Passport Expiry -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                            Passport Expiry
+                                        </label>
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <i class="far fa-calendar-alt text-gray-400"></i>
+                                            </div>
+                                            <input type="date" name="passport_expiry_{{ i }}"
+                                                   class="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        <!-- Terms & Conditions -->
+                        <div class="mb-8 p-6 bg-gradient-to-b from-blue-50 to-white border border-blue-200 rounded-xl">
+                            <div class="space-y-4">
+                                <div class="flex items-start">
+                                    <input type="checkbox" id="termsCheck"
+                                           class="mt-1 h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                           required>
+                                    <label for="termsCheck" class="ml-3 text-sm text-gray-700">
+                                        I agree to the 
+                                        <button type="button" onclick="openTermsModal()" 
+                                                class="text-blue-600 hover:text-blue-800 font-medium">
+                                            Terms & Conditions
+                                        </button>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex items-start">
+                                    <input type="checkbox" id="acknowledgeCheck"
+                                           class="mt-1 h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                           required>
+                                    <label for="acknowledgeCheck" class="ml-3 text-sm text-gray-700">
+                                        I understand this is a <strong class="text-blue-700">reservation only</strong>, not a ticket.
+                                        Seats will be held for 24 hours. Payment is required for ticketing.
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Buttons -->
+                        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t border-gray-200">
+                            <a href="{% url 'flight_search_results' %}"
+                               class="inline-flex items-center px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-arrow-left mr-2"></i>
+                                Back to Flights
+                            </a>
+                            
+                            <button type="submit"
+                                    class="inline-flex items-center px-8 py-4 border border-transparent rounded-xl shadow-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl">
+                                <i class="fas fa-lock mr-3"></i>
+                                <span class="text-lg font-semibold">Reserve Now</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Important Information -->
+                <div class="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-400 rounded-xl p-6 shadow-sm">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <div class="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg mr-4">
+                                <i class="fas fa-info-circle text-blue-600"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-900 mb-3">Important Information</h4>
+                            <ul class="space-y-2 text-gray-700">
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-blue-500 mt-1 mr-3 text-sm"></i>
+                                    <span>Names must match government-issued ID exactly</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-blue-500 mt-1 mr-3 text-sm"></i>
+                                    <span>Passport information is optional but recommended for international travel</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-blue-500 mt-1 mr-3 text-sm"></i>
+                                    <span>You will receive a PNR (record locator) immediately after reservation</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-blue-500 mt-1 mr-3 text-sm"></i>
+                                    <span>A PDF itinerary will be emailed to the contact email provided</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-blue-500 mt-1 mr-3 text-sm"></i>
+                                    <span>This reservation will automatically cancel after 24 hours if not ticketed</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terms Modal -->
+<div id="termsModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-8">
+            <div class="flex justify-between items-start mb-6">
+                <h3 class="text-2xl font-bold text-gray-900">Terms & Conditions</h3>
+                <button onclick="closeTermsModal()" 
+                        class="text-gray-400 hover:text-gray-500">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-6 text-gray-700">
+                <div>
+                    <h4 class="text-lg font-semibold text-gray-900 mb-2">Reservation Only - Not a Ticket</h4>
+                    <p>This system creates flight reservations (PNR) only. No tickets are issued until payment is completed.</p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold text-gray-900 mb-2">Hold Period</h4>
+                    <p>Reservations are held for 24 hours from creation. After this period, the reservation automatically cancels.</p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold text-gray-900 mb-2">Fare Rules</h4>
+                    <p>Fares are subject to change until ticketed. Airlines may change prices without notice.</p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold text-gray-900 mb-2">Cancellation</h4>
+                    <p>Un-ticketed reservations can be cancelled anytime at no charge. Ticketed bookings follow airline rules.</p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold text-gray-900 mb-2">Data Privacy</h4>
+                    <p>Passenger information is encrypted and stored securely per GDPR requirements.</p>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <button onclick="closeTermsModal()"
+                        class="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    {% block extra_js %}
+        <script>
+            // Terms Modal Functions
+            function openTermsModal() {
+                document.getElementById('termsModal').classList.remove('hidden');
+            }
+
+            function closeTermsModal() {
+                document.getElementById('termsModal').classList.add('hidden');
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                // Toggle passport fields
+                document.querySelectorAll('input[name^="has_passport_"]').forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        const passengerNum = this.name.split('_')[2];
+                        const passportFields = document.getElementById(`passportFields${passengerNum}`);
+                        if (passportFields) {
+                            passportFields.classList.toggle('hidden', !this.checked);
+                        }
+                    });
+                });
+
+                // Form validation
+                const bookingForm = document.getElementById('bookingForm');
+                bookingForm.addEventListener('submit', function(e) {
+                    const today = new Date().toISOString().split('T')[0];
+                    let isValid = true;
+                    const errors = [];
+
+                    // Check Date of Birth
+                    document.querySelectorAll('input[name^="dob_"]').forEach(input => {
+                        if (input.value > today) {
+                            errors.push('Date of birth cannot be in the future');
+                            input.classList.add('border-red-500', 'ring-2', 'ring-red-200');
+                            isValid = false;
+                        } else {
+                            input.classList.remove('border-red-500', 'ring-2', 'ring-red-200');
+                        }
+                    });
+
+                    // Check Passport Expiry
+                    document.querySelectorAll('input[name^="passport_expiry_"]').forEach(input => {
+                        if (input.value && input.value < today) {
+                            errors.push('Passport expiry date cannot be in the past');
+                            input.classList.add('border-red-500', 'ring-2', 'ring-red-200');
+                            isValid = false;
+                        } else {
+                            input.classList.remove('border-red-500', 'ring-2', 'ring-red-200');
+                        }
+                    });
+
+                    // Check required checkboxes
+                    const termsCheck = document.getElementById('termsCheck');
+                    const acknowledgeCheck = document.getElementById('acknowledgeCheck');
+                    
+                    if (!termsCheck.checked) {
+                        errors.push('You must agree to the Terms & Conditions');
+                        termsCheck.parentElement.classList.add('text-red-600');
+                    } else {
+                        termsCheck.parentElement.classList.remove('text-red-600');
+                    }
+
+                    if (!acknowledgeCheck.checked) {
+                        errors.push('You must acknowledge this is a reservation only');
+                        acknowledgeCheck.parentElement.classList.add('text-red-600');
+                    } else {
+                        acknowledgeCheck.parentElement.classList.remove('text-red-600');
+                    }
+
+                    if (!isValid) {
+                        e.preventDefault();
+                        // Show error notification
+                        showErrorNotification(errors.join('<br>'));
+                    }
+                });
+
+                // Real-time validation for required fields
+                document.querySelectorAll('[required]').forEach(field => {
+                    field.addEventListener('blur', function() {
+                        if (!this.value.trim()) {
+                            this.classList.add('border-red-500', 'ring-2', 'ring-red-200');
+                        } else {
+                            this.classList.remove('border-red-500', 'ring-2', 'ring-red-200');
+                        }
+                    });
+                });
+
+                // Show error notification
+                function showErrorNotification(message) {
+                    // Remove existing notification
+                    const existingNotification = document.getElementById('errorNotification');
+                    if (existingNotification) {
+                        existingNotification.remove();
+                    }
+
+                    const notification = document.createElement('div');
+                    notification.id = 'errorNotification';
+                    notification.className = 'fixed top-4 right-4 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-lg z-50 max-w-md';
+                    notification.innerHTML = `
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-red-800">Please fix the following errors:</h3>
+                                <div class="mt-2 text-sm text-red-700">${message}</div>
+                            </div>
+                            <button onclick="this.parentElement.remove()" class="ml-auto pl-3">
+                                <i class="fas fa-times text-red-500"></i>
+                            </button>
+                        </div>
+                    `;
+
+                    document.body.appendChild(notification);
+
+                    // Auto-remove after 10 seconds
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 10000);
+                }
+
+                // Close modal when clicking outside
+                const modal = document.getElementById('termsModal');
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeTermsModal();
+                    }
+                });
+
+                // Add subtle animations to form sections
+                const formSections = document.querySelectorAll('.passenger-form');
+                formSections.forEach((section, index) => {
+                    section.style.opacity = '0';
+                    section.style.transform = 'translateY(20px)';
+                    
+                    setTimeout(() => {
+                        section.style.transition = 'all 0.6s ease-out';
+                        section.style.opacity = '1';
+                        section.style.transform = 'translateY(0)';
+                    }, index * 100);
+                });
+            });
+        </script>
+
+        <style>
+            /* Custom animations */
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .passenger-form {
+                animation: fadeInUp 0.6s ease-out;
+            }
+
+            /* Custom scrollbar for modal */
+            #termsModal > div::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            #termsModal > div::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 4px;
+            }
+
+            #termsModal > div::-webkit-scrollbar-thumb {
+                background: #888;
+                border-radius: 4px;
+            }
+
+            #termsModal > div::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
+
+            /* Focus styles */
+            input:focus, select:focus {
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
+        </style>
+    {% endblock %}
+{% endblock %}

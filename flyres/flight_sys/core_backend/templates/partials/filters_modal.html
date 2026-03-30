@@ -1,0 +1,374 @@
+<!-- templates/core/partials/filters_modal.html -->
+<div id="filtersModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-hidden">
+        <!-- Modal Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fas fa-filter text-white text-xl mr-3"></i>
+                    <h3 class="text-xl font-bold text-white">Filter Flights</h3>
+                </div>
+                <button onclick="closeFiltersModal()" 
+                        class="text-white hover:text-gray-200 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal Content -->
+        <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+            <!-- Price Range -->
+            <div class="mb-8">
+                <h4 class="font-semibold text-gray-900 mb-4 text-lg">
+                    <i class="fas fa-dollar-sign text-blue-500 mr-2"></i>Price Range
+                </h4>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-gray-600">Min: <span id="minPriceValue" class="font-medium">$0</span></span>
+                        <span class="text-sm text-gray-600">Max: <span id="maxPriceValue" class="font-medium">${{ price_ranges.3.max|default:5000 }}</span></span>
+                    </div>
+                    <input type="range" min="0" max="{{ price_ranges.3.max|default:5000 }}" value="0" 
+                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" 
+                           id="priceRangeMin">
+                    <input type="range" min="0" max="{{ price_ranges.3.max|default:5000 }}" 
+                           value="{{ price_ranges.3.max|default:5000 }}"
+                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" 
+                           id="priceRangeMax">
+                </div>
+            </div>
+
+            <!-- Airlines -->
+            {% if airlines %}
+            <div class="mb-8">
+                <h4 class="font-semibold text-gray-900 mb-4 text-lg">
+                    <i class="fas fa-plane text-blue-500 mr-2"></i>Airlines
+                </h4>
+                <div class="space-y-2">
+                    {% for airline in airlines %}
+                    <div class="flex items-center">
+                        <input type="checkbox" 
+                               id="airline{{ forloop.counter }}" 
+                               class="h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                               data-airline="{{ airline.code }}">
+                        <label for="airline{{ forloop.counter }}" 
+                               class="ml-3 text-gray-700 hover:text-gray-900 cursor-pointer">
+                            {{ airline.name }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Stops -->
+            <div class="mb-8">
+                <h4 class="font-semibold text-gray-900 mb-4 text-lg">
+                    <i class="fas fa-exchange-alt text-blue-500 mr-2"></i>Stops
+                </h4>
+                <div class="grid grid-cols-2 gap-3">
+                    <button class="stop-filter-btn flex items-center justify-center px-4 py-3 border-2 border-blue-500 text-blue-600 font-medium rounded-xl hover:bg-blue-50 transition-colors"
+                            data-stops="0">
+                        <i class="fas fa-ban mr-2"></i>Non-stop
+                    </button>
+                    <button class="stop-filter-btn flex items-center justify-center px-4 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors"
+                            data-stops="1">
+                        <i class="fas fa-exchange-alt mr-2"></i>1 Stop
+                    </button>
+                    <button class="stop-filter-btn flex items-center justify-center px-4 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors"
+                            data-stops="2">
+                        2 Stops
+                    </button>
+                    <button class="stop-filter-btn flex items-center justify-center px-4 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors"
+                            data-stops="3">
+                        3+ Stops
+                    </button>
+                </div>
+            </div>
+
+            <!-- Departure Time -->
+            <div class="mb-8">
+                <h4 class="font-semibold text-gray-900 mb-4 text-lg">
+                    <i class="far fa-clock text-blue-500 mr-2"></i>Departure Time
+                </h4>
+                <div class="grid grid-cols-2 gap-3">
+                    <button class="time-filter-btn flex items-center justify-center px-4 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors"
+                            data-time="morning">
+                        <i class="fas fa-sun mr-2 text-yellow-500"></i>Morning<br><span class="text-xs">6AM-12PM</span>
+                    </button>
+                    <button class="time-filter-btn flex items-center justify-center px-4 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors"
+                            data-time="afternoon">
+                        <i class="fas fa-sun mr-2 text-orange-500"></i>Afternoon<br><span class="text-xs">12PM-6PM</span>
+                    </button>
+                    <button class="time-filter-btn flex items-center justify-center px-4 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors"
+                            data-time="evening">
+                        <i class="fas fa-moon mr-2 text-indigo-500"></i>Evening<br><span class="text-xs">6PM-12AM</span>
+                    </button>
+                    <button class="time-filter-btn flex items-center justify-center px-4 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors"
+                            data-time="night">
+                        <i class="fas fa-star mr-2 text-gray-500"></i>Night<br><span class="text-xs">12AM-6AM</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Travel Class -->
+            <div class="mb-8">
+                <h4 class="font-semibold text-gray-900 mb-4 text-lg">
+                    <i class="fas fa-crown text-blue-500 mr-2"></i>Travel Class
+                </h4>
+                <div class="space-y-2">
+                    {% for class in travel_classes %}
+                    <div class="flex items-center">
+                        <input type="radio" 
+                               id="class{{ forloop.counter }}" 
+                               name="travelClass"
+                               value="{{ class.value }}"
+                               class="h-5 w-5 text-blue-600 focus:ring-blue-500">
+                        <label for="class{{ forloop.counter }}" 
+                               class="ml-3 text-gray-700 hover:text-gray-900 cursor-pointer">
+                            {{ class.label }}
+                        </label>
+                    </div>
+                    {% empty %}
+                    <div class="flex items-center">
+                        <input type="radio" id="class1" name="travelClass" value="ECONOMY" class="h-5 w-5 text-blue-600 focus:ring-blue-500" checked>
+                        <label for="class1" class="ml-3 text-gray-700">Economy</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="class2" name="travelClass" value="PREMIUM_ECONOMY" class="h-5 w-5 text-blue-600 focus:ring-blue-500">
+                        <label for="class2" class="ml-3 text-gray-700">Premium Economy</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="class3" name="travelClass" value="BUSINESS" class="h-5 w-5 text-blue-600 focus:ring-blue-500">
+                        <label for="class3" class="ml-3 text-gray-700">Business</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="class4" name="travelClass" value="FIRST" class="h-5 w-5 text-blue-600 focus:ring-blue-500">
+                        <label for="class4" class="ml-3 text-gray-700">First Class</label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+            <div class="flex justify-between items-center">
+                <button onclick="resetFilters()"
+                        class="px-5 py-2.5 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl font-medium transition-colors">
+                    <i class="fas fa-redo mr-2"></i>Reset Filters
+                </button>
+                <div class="flex gap-3">
+                    <button onclick="closeFiltersModal()"
+                            class="px-5 py-2.5 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl font-medium transition-colors">
+                        Cancel
+                    </button>
+                    <button onclick="applyFilters()"
+                            class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-colors shadow-lg">
+                        <i class="fas fa-check mr-2"></i>Apply Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Price range display
+const priceRangeMin = document.getElementById('priceRangeMin');
+const priceRangeMax = document.getElementById('priceRangeMax');
+const minPriceValue = document.getElementById('minPriceValue');
+const maxPriceValue = document.getElementById('maxPriceValue');
+
+if (priceRangeMin && priceRangeMax) {
+    priceRangeMin.addEventListener('input', function() {
+        minPriceValue.textContent = '$' + this.value;
+        // Ensure min doesn't exceed max
+        if (parseInt(this.value) > parseInt(priceRangeMax.value)) {
+            priceRangeMax.value = this.value;
+            maxPriceValue.textContent = '$' + this.value;
+        }
+    });
+    
+    priceRangeMax.addEventListener('input', function() {
+        maxPriceValue.textContent = '$' + this.value;
+        // Ensure max doesn't go below min
+        if (parseInt(this.value) < parseInt(priceRangeMin.value)) {
+            priceRangeMin.value = this.value;
+            minPriceValue.textContent = '$' + this.value;
+        }
+    });
+}
+
+// Filter button states
+document.querySelectorAll('.stop-filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.stop-filter-btn').forEach(b => {
+            b.classList.remove('border-blue-500', 'text-blue-600', 'bg-blue-50');
+            b.classList.add('border-gray-300', 'text-gray-700');
+        });
+        this.classList.remove('border-gray-300', 'text-gray-700');
+        this.classList.add('border-blue-500', 'text-blue-600', 'bg-blue-50');
+    });
+});
+
+document.querySelectorAll('.time-filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.time-filter-btn').forEach(b => {
+            b.classList.remove('border-blue-500', 'text-blue-600', 'bg-blue-50');
+            b.classList.add('border-gray-300', 'text-gray-700');
+        });
+        this.classList.remove('border-gray-300', 'text-gray-700');
+        this.classList.add('border-blue-500', 'text-blue-600', 'bg-blue-50');
+    });
+});
+
+// Modal functions
+function openFiltersModal() {
+    document.getElementById('filtersModal').classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+}
+
+function closeFiltersModal() {
+    document.getElementById('filtersModal').classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+}
+
+function resetFilters() {
+    // Reset price range
+    if (priceRangeMin && priceRangeMax) {
+        priceRangeMin.value = 0;
+        priceRangeMax.value = priceRangeMax.max;
+        minPriceValue.textContent = '$0';
+        maxPriceValue.textContent = '$' + priceRangeMax.max;
+    }
+    
+    // Reset airline checkboxes
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+    });
+    
+    // Reset stop filters
+    document.querySelectorAll('.stop-filter-btn').forEach(btn => {
+        btn.classList.remove('border-blue-500', 'text-blue-600', 'bg-blue-50');
+        btn.classList.add('border-gray-300', 'text-gray-700');
+    });
+    
+    // Reset time filters
+    document.querySelectorAll('.time-filter-btn').forEach(btn => {
+        btn.classList.remove('border-blue-500', 'text-blue-600', 'bg-blue-50');
+        btn.classList.add('border-gray-300', 'text-gray-700');
+    });
+    
+    // Reset travel class
+    document.querySelectorAll('input[name="travelClass"]').forEach(radio => {
+        radio.checked = (radio.value === 'ECONOMY');
+    });
+}
+
+function applyFilters() {
+    // Collect filter values
+    const filters = {
+        minPrice: priceRangeMin ? parseInt(priceRangeMin.value) : 0,
+        maxPrice: priceRangeMax ? parseInt(priceRangeMax.value) : 5000,
+        airlines: [],
+        stops: null,
+        departureTime: null,
+        travelClass: document.querySelector('input[name="travelClass"]:checked')?.value || 'ECONOMY'
+    };
+    
+    // Get selected airlines
+    document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+        filters.airlines.push(cb.dataset.airline);
+    });
+    
+    // Get selected stops
+    const selectedStopBtn = document.querySelector('.stop-filter-btn.border-blue-500');
+    if (selectedStopBtn) {
+        filters.stops = parseInt(selectedStopBtn.dataset.stops);
+    }
+    
+    // Get selected time
+    const selectedTimeBtn = document.querySelector('.time-filter-btn.border-blue-500');
+    if (selectedTimeBtn) {
+        filters.departureTime = selectedTimeBtn.dataset.time;
+    }
+    
+    console.log('Applied filters:', filters);
+    
+    // Apply filters to flight cards
+    applyFiltersToResults(filters);
+    
+    // Close modal
+    closeFiltersModal();
+}
+
+function applyFiltersToResults(filters) {
+    const flightCards = document.querySelectorAll('.flight-card');
+    let visibleCount = 0;
+    
+    flightCards.forEach(card => {
+        const price = parseFloat(card.dataset.priceNumeric) || 0;
+        const stops = parseInt(card.dataset.stops) || 0;
+        const airline = card.dataset.airline || '';
+        const departureTime = card.dataset.departure || '';
+        
+        // Apply filters
+        let showCard = true;
+        
+        // Price filter
+        if (price < filters.minPrice || price > filters.maxPrice) {
+            showCard = false;
+        }
+        
+        // Airline filter
+        if (filters.airlines.length > 0 && !filters.airlines.includes(airline)) {
+            showCard = false;
+        }
+        
+        // Stops filter
+        if (filters.stops !== null) {
+            if (filters.stops === 3) {
+                if (stops < 3) showCard = false;
+            } else if (stops !== filters.stops) {
+                showCard = false;
+            }
+        }
+        
+        // Departure time filter (simplified)
+        if (filters.departureTime) {
+            // You would need to implement time range checking based on departureTime
+        }
+        
+        // Show/hide card
+        if (showCard) {
+            card.classList.remove('hidden');
+            visibleCount++;
+        } else {
+            card.classList.add('hidden');
+        }
+    });
+    
+    // Show/hide no results message
+    const noResults = document.getElementById('noResults');
+    if (noResults) {
+        if (visibleCount === 0) {
+            noResults.classList.remove('hidden');
+        } else {
+            noResults.classList.add('hidden');
+        }
+    }
+    
+    // Update count
+    const countElement = document.querySelector('.text-blue-600.font-semibold');
+    if (countElement) {
+        countElement.textContent = visibleCount;
+    }
+}
+
+// Close modal when clicking outside
+document.getElementById('filtersModal')?.addEventListener('click', function(e) {
+    if (e.target.id === 'filtersModal') {
+        closeFiltersModal();
+    }
+});
+</script>

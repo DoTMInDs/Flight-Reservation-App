@@ -1,0 +1,543 @@
+{
+  "data": {
+    "type": "flight-offers-pricing",
+    "flightOffers": [
+      {
+        "type": "flight-offer",
+        "id": "9",
+        "source": "GDS",
+        "instantTicketingRequired": false,
+        "nonHomogeneous": false,
+        "oneWay": false,
+        "isUpsellOffer": false,
+        "lastTicketingDate": "2026-03-26",
+        "lastTicketingDateTime": "2026-03-26",
+        "numberOfBookableSeats": 9,
+        "itineraries": [
+          {
+            "duration": "PT15H30M",
+            "segments": [
+              {
+                "departure": {
+                  "iataCode": "ACC",
+                  "terminal": "3",
+                  "at": "2026-03-26T22:05:00"
+                },
+                "arrival": {
+                  "iataCode": "AMS",
+                  "at": "2026-03-27T05:45:00"
+                },
+                "carrierCode": "AF",
+                "number": "8248",
+                "aircraft": {
+                  "code": "77W"
+                },
+                "operating": {
+                  "carrierCode": "KL"
+                },
+                "duration": "PT6H40M",
+                "id": "30",
+                "numberOfStops": 0,
+                "blacklistedInEU": false
+              },
+              {
+                "departure": {
+                  "iataCode": "AMS",
+                  "at": "2026-03-27T07:20:00"
+                },
+                "arrival": {
+                  "iataCode": "CDG",
+                  "terminal": "2F",
+                  "at": "2026-03-27T08:45:00"
+                },
+                "carrierCode": "AF",
+                "number": "5473",
+                "aircraft": {
+                  "code": "32Q"
+                },
+                "operating": {
+                  "carrierCode": "KL"
+                },
+                "duration": "PT1H25M",
+                "id": "31",
+                "numberOfStops": 0,
+                "blacklistedInEU": false
+              },
+              {
+                "departure": {
+                  "iataCode": "CDG",
+                  "terminal": "2F",
+                  "at": "2026-03-27T13:00:00"
+                },
+                "arrival": {
+                  "iataCode": "MUC",
+                  "terminal": "1",
+                  "at": "2026-03-27T14:35:00"
+                },
+                "carrierCode": "AF",
+                "number": "1622",
+                "aircraft": {
+                  "code": "223"
+                },
+                "operating": {
+                  "carrierCode": "AF"
+                },
+                "duration": "PT1H35M",
+                "id": "32",
+                "numberOfStops": 0,
+                "blacklistedInEU": false
+              }
+            ]
+          },
+          {
+            "duration": "PT10H",
+            "segments": [
+              {
+                "departure": {
+                  "iataCode": "MUC",
+                  "terminal": "1",
+                  "at": "2026-04-01T11:50:00"
+                },
+                "arrival": {
+                  "iataCode": "AMS",
+                  "at": "2026-04-01T13:25:00"
+                },
+                "carrierCode": "KL",
+                "number": "1852",
+                "aircraft": {
+                  "code": "73J"
+                },
+                "operating": {
+                  "carrierCode": "KL"
+                },
+                "duration": "PT1H35M",
+                "id": "47",
+                "numberOfStops": 0,
+                "blacklistedInEU": false
+              },
+              {
+                "departure": {
+                  "iataCode": "AMS",
+                  "at": "2026-04-01T15:20:00"
+                },
+                "arrival": {
+                  "iataCode": "ACC",
+                  "terminal": "3",
+                  "at": "2026-04-01T19:50:00"
+                },
+                "carrierCode": "KL",
+                "number": "589",
+                "aircraft": {
+                  "code": "77W"
+                },
+                "operating": {
+                  "carrierCode": "KL"
+                },
+                "duration": "PT6H30M",
+                "id": "48",
+                "numberOfStops": 0,
+                "blacklistedInEU": false
+              }
+            ]
+          }
+        ],
+        "price": {
+          "currency": "EUR",
+          "total": "765.72",
+          "base": "250.00",
+          "fees": [
+            {
+              "amount": "0.00",
+              "type": "SUPPLIER"
+            },
+            {
+              "amount": "0.00",
+              "type": "TICKETING"
+            }
+          ],
+          "grandTotal": "765.72",
+          "additionalServices": [
+            {
+              "amount": "60.00",
+              "type": "CHECKED_BAGS"
+            }
+          ]
+        },
+        "pricingOptions": {
+          "fareType": [
+            "PUBLISHED"
+          ],
+          "includedCheckedBagsOnly": false
+        },
+        "validatingAirlineCodes": [
+          "AF"
+        ],
+        "travelerPricings": [
+          {
+            "travelerId": "1",
+            "fareOption": "STANDARD",
+            "travelerType": "ADULT",
+            "price": {
+              "currency": "EUR",
+              "total": "765.72",
+              "base": "250.00"
+            },
+            "fareDetailsBySegment": [
+              {
+                "segmentId": "30",
+                "cabin": "ECONOMY",
+                "fareBasis": "TRL0JBLA",
+                "brandedFare": "LIGHT",
+                "brandedFareLabel": "ECONOMY LIGHT",
+                "class": "T",
+                "includedCheckedBags": {
+                  "quantity": 0
+                },
+                "includedCabinBags": {
+                  "quantity": 1
+                },
+                "amenities": [
+                  {
+                    "description": "CHECKED BAG 1PC OF 23KG 158CM",
+                    "isChargeable": true,
+                    "amenityType": "BAGGAGE",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "SNACK",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "BEVERAGE",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MEAL",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "SEAT SELECTION",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MILEAGE ACCRUAL",
+                    "isChargeable": false,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  }
+                ]
+              },
+              {
+                "segmentId": "31",
+                "cabin": "ECONOMY",
+                "fareBasis": "TRL0JBLA",
+                "brandedFare": "LIGHT",
+                "brandedFareLabel": "ECONOMY LIGHT",
+                "class": "L",
+                "includedCheckedBags": {
+                  "quantity": 0
+                },
+                "includedCabinBags": {
+                  "quantity": 1
+                },
+                "amenities": [
+                  {
+                    "description": "CHECKED BAG 1PC OF 23KG 158CM",
+                    "isChargeable": true,
+                    "amenityType": "BAGGAGE",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "SNACK",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "BEVERAGE",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MEAL",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "SEAT SELECTION",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MILEAGE ACCRUAL",
+                    "isChargeable": false,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  }
+                ]
+              },
+              {
+                "segmentId": "32",
+                "cabin": "ECONOMY",
+                "fareBasis": "TRL0JBLA",
+                "brandedFare": "LIGHT",
+                "brandedFareLabel": "ECONOMY LIGHT",
+                "class": "L",
+                "includedCheckedBags": {
+                  "quantity": 0
+                },
+                "includedCabinBags": {
+                  "quantity": 1
+                },
+                "amenities": [
+                  {
+                    "description": "CHECKED BAG 1PC OF 23KG 158CM",
+                    "isChargeable": true,
+                    "amenityType": "BAGGAGE",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "SNACK",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "BEVERAGE",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MEAL",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "SEAT SELECTION",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MILEAGE ACCRUAL",
+                    "isChargeable": false,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  }
+                ]
+              },
+              {
+                "segmentId": "47",
+                "cabin": "ECONOMY",
+                "fareBasis": "RRL0JBLA",
+                "brandedFare": "LIGHT",
+                "brandedFareLabel": "ECONOMY LIGHT",
+                "class": "L",
+                "includedCheckedBags": {
+                  "quantity": 0
+                },
+                "includedCabinBags": {
+                  "quantity": 1
+                },
+                "amenities": [
+                  {
+                    "description": "CHECKED BAG 1PC OF 23KG 158CM",
+                    "isChargeable": true,
+                    "amenityType": "BAGGAGE",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "SNACK",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "BEVERAGE",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MEAL",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "SEAT SELECTION",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MILEAGE ACCRUAL",
+                    "isChargeable": false,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  }
+                ]
+              },
+              {
+                "segmentId": "48",
+                "cabin": "ECONOMY",
+                "fareBasis": "RRL0JBLA",
+                "brandedFare": "LIGHT",
+                "brandedFareLabel": "ECONOMY LIGHT",
+                "class": "R",
+                "includedCheckedBags": {
+                  "quantity": 0
+                },
+                "includedCabinBags": {
+                  "quantity": 1
+                },
+                "amenities": [
+                  {
+                    "description": "CHECKED BAG 1PC OF 23KG 158CM",
+                    "isChargeable": true,
+                    "amenityType": "BAGGAGE",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "SNACK",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "BEVERAGE",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MEAL",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "SEAT SELECTION",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MILEAGE ACCRUAL",
+                    "isChargeable": false,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "travelers": [
+      {
+        "id": "1",
+        "dateOfBirth": "1997-09-17",
+        "name": {
+          "firstName": "Esmond",
+          "lastName": "Abban"
+        },
+        "gender": "MALE",
+        "contact": {
+          "emailAddress": "esmondabban3@gmail.com",
+          "phones": [
+            {
+              "deviceType": "MOBILE",
+              "countryCallingCode": "1",
+              "number": "0597332178"
+            }
+          ]
+        },
+        "documents": [
+          {
+            "documentType": "PASSPORT",
+            "number": "A0140077",
+            "expiryDate": "2032-02-10",
+            "issuanceCountry": "GH",
+            "nationality": "GH",
+            "holder": true
+          }
+        ]
+      }
+    ]
+  }
+}

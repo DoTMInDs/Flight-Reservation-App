@@ -1,0 +1,286 @@
+{
+  "data": {
+    "type": "flight-offers-pricing",
+    "flightOffers": [
+      {
+        "type": "flight-offer",
+        "id": "1",
+        "source": "GDS",
+        "instantTicketingRequired": false,
+        "nonHomogeneous": false,
+        "oneWay": false,
+        "isUpsellOffer": false,
+        "lastTicketingDate": "2026-02-04",
+        "lastTicketingDateTime": "2026-02-04",
+        "numberOfBookableSeats": 9,
+        "itineraries": [
+          {
+            "duration": "PT11H35M",
+            "segments": [
+              {
+                "departure": {
+                  "iataCode": "ACC",
+                  "terminal": "3",
+                  "at": "2026-02-04T21:00:00"
+                },
+                "arrival": {
+                  "iataCode": "IST",
+                  "at": "2026-02-05T06:55:00"
+                },
+                "carrierCode": "TK",
+                "number": "630",
+                "aircraft": {
+                  "code": "7M9"
+                },
+                "operating": {
+                  "carrierCode": "TK"
+                },
+                "duration": "PT6H55M",
+                "id": "84",
+                "numberOfStops": 0,
+                "blacklistedInEU": false
+              },
+              {
+                "departure": {
+                  "iataCode": "IST",
+                  "at": "2026-02-05T08:50:00"
+                },
+                "arrival": {
+                  "iataCode": "MUC",
+                  "terminal": "1",
+                  "at": "2026-02-05T09:35:00"
+                },
+                "carrierCode": "TK",
+                "number": "1629",
+                "aircraft": {
+                  "code": "332"
+                },
+                "operating": {
+                  "carrierCode": "TK"
+                },
+                "duration": "PT2H45M",
+                "id": "85",
+                "numberOfStops": 0,
+                "blacklistedInEU": false
+              }
+            ]
+          }
+        ],
+        "price": {
+          "currency": "EUR",
+          "total": "524.01",
+          "base": "260.00",
+          "fees": [
+            {
+              "amount": "0.00",
+              "type": "SUPPLIER"
+            },
+            {
+              "amount": "0.00",
+              "type": "TICKETING"
+            }
+          ],
+          "grandTotal": "524.01"
+        },
+        "pricingOptions": {
+          "fareType": [
+            "PUBLISHED"
+          ],
+          "includedCheckedBagsOnly": true
+        },
+        "validatingAirlineCodes": [
+          "TK"
+        ],
+        "travelerPricings": [
+          {
+            "travelerId": "1",
+            "fareOption": "STANDARD",
+            "travelerType": "ADULT",
+            "price": {
+              "currency": "EUR",
+              "total": "524.01",
+              "base": "260.00"
+            },
+            "fareDetailsBySegment": [
+              {
+                "segmentId": "84",
+                "cabin": "ECONOMY",
+                "fareBasis": "QLB2XPOW",
+                "brandedFare": "RS",
+                "brandedFareLabel": "RESTRICTED",
+                "class": "Q",
+                "includedCheckedBags": {
+                  "quantity": 2
+                },
+                "includedCabinBags": {
+                  "quantity": 1
+                },
+                "amenities": [
+                  {
+                    "description": "BAG INCLUDED",
+                    "isChargeable": false,
+                    "amenityType": "BAGGAGE",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MEAL SERVICE",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "STANDARD SEAT SELECTION",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "REFUNDABLE TICKET",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "CHANGEABLE TICKET",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "ONLINE MESSAGE RIGHT",
+                    "isChargeable": false,
+                    "amenityType": "ENTERTAINMENT",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "FRONT SEAT SELECTION",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  }
+                ]
+              },
+              {
+                "segmentId": "85",
+                "cabin": "ECONOMY",
+                "fareBasis": "QLB2XPOW",
+                "brandedFare": "RS",
+                "brandedFareLabel": "RESTRICTED",
+                "class": "Q",
+                "includedCheckedBags": {
+                  "quantity": 2
+                },
+                "includedCabinBags": {
+                  "quantity": 1
+                },
+                "amenities": [
+                  {
+                    "description": "BAG INCLUDED",
+                    "isChargeable": false,
+                    "amenityType": "BAGGAGE",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "MEAL SERVICE",
+                    "isChargeable": false,
+                    "amenityType": "MEAL",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "STANDARD SEAT SELECTION",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "REFUNDABLE TICKET",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "CHANGEABLE TICKET",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "ONLINE MESSAGE RIGHT",
+                    "isChargeable": false,
+                    "amenityType": "ENTERTAINMENT",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  },
+                  {
+                    "description": "FRONT SEAT SELECTION",
+                    "isChargeable": true,
+                    "amenityType": "BRANDED_FARES",
+                    "amenityProvider": {
+                      "name": "BrandedFare"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "travelers": [
+      {
+        "id": "1",
+        "dateOfBirth": "1997-09-17",
+        "name": {
+          "firstName": "Esmond",
+          "lastName": "Abban"
+        },
+        "gender": "MALE",
+        "contact": {
+          "emailAddress": "esmondabban3@gmail.com",
+          "phones": [
+            {
+              "deviceType": "MOBILE",
+              "countryCallingCode": "1",
+              "number": "0597332178"
+            }
+          ]
+        },
+        "documents": [
+          {
+            "documentType": "PASSPORT",
+            "number": "A0140077",
+            "expiryDate": "2032-02-10",
+            "issuanceCountry": "GH",
+            "nationality": "GH",
+            "holder": true
+          }
+        ]
+      }
+    ]
+  }
+}

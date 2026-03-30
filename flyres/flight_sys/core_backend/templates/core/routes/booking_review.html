@@ -1,0 +1,316 @@
+<!-- templates/core/routes/booking_review.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Review Booking - FlightReserve{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mb-6">Review & Confirm Booking</h1>
+        
+        <!-- Success Message -->
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags == 'success' %}
+                <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        {{ message }}
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        
+        <!-- Warning Message -->
+        <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div class="flex">
+                <i class="fas fa-exclamation-triangle text-yellow-500 mt-1 mr-3"></i>
+                <div>
+                    <h4 class="font-semibold text-yellow-800">Price Verification</h4>
+                    <p class="text-sm text-yellow-700 mt-1">
+                        The fare has been verified. Please review all details before confirming your booking.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Flight Summary -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Flight Details</h2>
+            <div class="border rounded-lg p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold">{{ flight_summary.airline }}</h3>
+                        <p class="text-gray-600">
+                            {{ flight_summary.origin }} → {{ flight_summary.destination }}
+                        </p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-blue-600">
+                            ${{ price_details.total|default:selected_flight.price }}
+                        </div>
+                        <p class="text-sm text-gray-500">Total price</p>
+                    </div>
+                </div>
+                
+                <!-- CHANGED: Updated airport display format -->
+                <div class="flex items-center justify-between">
+                    <div class="text-center">
+                        <!-- Departure -->
+                        <div class="airport-display">
+                            <div class="text-lg font-bold">{{ flight_summary.origin }}</div>
+                            <div class="text-gray-600">
+                                {% if flight_summary.origin_city and flight_summary.origin_country %}
+                                    {{ flight_summary.origin_city }}, {{ flight_summary.origin_country }}
+                                {% else %}
+                                    {{ flight_summary.origin }}
+                                {% endif %}
+                            </div>
+                            <div class="text-lg font-bold mt-2">{{ flight_summary.departure|slice:"11:16" }}</div>
+                            <div class="text-sm text-gray-500">{{ flight_summary.departure|slice:10 }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1 mx-8 text-center">
+                        <div class="relative">
+                            <div class="border-t-2 border-gray-300 w-full"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                {% with flight_summary.duration|slice:"2:" as duration %}
+                                <span class="bg-white px-4 py-1 text-gray-600">{{ duration|lower }}</span>
+                                {% endwith %}
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500 mt-2">
+                            {% if flight_summary.stops == 0 %}
+                            Non-stop
+                            {% else %}
+                            {{ flight_summary.stops }} stop{{ flight_summary.stops|pluralize }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <!-- Arrival -->
+                        <div class="airport-display">
+                            <div class="text-lg font-bold">{{ flight_summary.destination }}</div>
+                            <div class="text-gray-600">
+                                {% if flight_summary.destination_city and flight_summary.destination_country %}
+                                    {{ flight_summary.destination_city }}, {{ flight_summary.destination_country }}
+                                {% else %}
+                                    {{ flight_summary.destination }}
+                                {% endif %}
+                            </div>
+                            <div class="text-lg font-bold mt-2">{{ flight_summary.arrival|slice:"11:16" }}</div>
+                            <div class="text-sm text-gray-500">{{ flight_summary.arrival|slice:10 }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- CHANGED: Display segments if available (for connecting flights) -->
+                {% if priced_flight.priced_offer.data.flightOffers.0.itineraries.0.segments %}
+                <div class="mt-6 pt-6 border-t">
+                    <h4 class="font-semibold text-gray-700 mb-3">Flight Segments</h4>
+                    <div class="space-y-4">
+                        {% for segment in priced_flight.priced_offer.data.flightOffers.0.itineraries.0.segments %}
+                        <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                            <div class="text-center flex-1">
+                                <div class="text-lg font-bold">{{ segment.departure.iataCode }}</div>
+                                <div class="text-gray-600 text-sm">
+                                    {% if segment.departure.city and segment.departure.country %}
+                                        {{ segment.departure.city }}, {{ segment.departure.country }}
+                                    {% else %}
+                                        {{ segment.departure.iataCode }}
+                                    {% endif %}
+                                </div>
+                                <div class="font-medium mt-1">{{ segment.departure.at|slice:"11:16" }}</div>
+                            </div>
+                            
+                            <div class="mx-4 text-center flex-1">
+                                <div class="text-gray-500 text-sm">{{ segment.carrierCode }} {{ segment.number }}</div>
+                                <div class="text-gray-400 text-xs mt-1">{{ segment.duration|slice:"2:"|lower }}</div>
+                            </div>
+                            
+                            <div class="text-center flex-1">
+                                <div class="text-lg font-bold">{{ segment.arrival.iataCode }}</div>
+                                <div class="text-gray-600 text-sm">
+                                    {% if segment.arrival.city and segment.arrival.country %}
+                                        {{ segment.arrival.city }}, {{ segment.arrival.country }}
+                                    {% else %}
+                                        {{ segment.arrival.iataCode }}
+                                    {% endif %}
+                                </div>
+                                <div class="font-medium mt-1">{{ segment.arrival.at|slice:"11:16" }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Price Breakdown -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Price Breakdown</h2>
+            <div class="space-y-3">
+                {% if price_details.base %}
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Base Fare</span>
+                    <span class="font-medium">${{ price_details.base }}</span>
+                </div>
+                {% endif %}
+                
+                {% if price_details.taxes %}
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Taxes & Fees</span>
+                    <span class="font-medium">${{ price_details.taxes }}</span>
+                </div>
+                {% endif %}
+                
+                {% if price_details.currency %}
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Currency</span>
+                    <span class="font-medium">{{ price_details.currency }}</span>
+                </div>
+                {% endif %}
+                
+                <div class="border-t pt-3">
+                    <div class="flex justify-between font-bold text-lg">
+                        <span>Total</span>
+                        <span class="text-blue-600">${{ price_details.total|default:selected_flight.price }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Passenger Details -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Passenger Details ({{ traveler_count }})</h2>
+            {% for traveler in travelers %}
+            <div class="border rounded-lg p-4 mb-3">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="font-semibold">Passenger {{ forloop.counter }}</h3>
+                        <p class="text-gray-700">{{ traveler.name.firstName }} {{ traveler.name.lastName }}</p>
+                        <p class="text-sm text-gray-500">
+                            {{ traveler.gender|title }} • 
+                            DOB: {{ traveler.dateOfBirth }} •
+                            Email: {{ traveler.contact.emailAddress }}
+                        </p>
+                        {% if traveler.documents %}
+                        <p class="text-sm text-gray-500 mt-1">
+                            Passport: {{ traveler.documents.0.number }} • 
+                            Expiry: {{ traveler.documents.0.expiryDate }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Confirm Booking Form -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Confirm Booking</h2>
+            
+            <form method="POST" action="{% url 'create_booking' %}">
+                {% csrf_token %}
+                
+                <!-- Hidden fields to pass data -->
+                <input type="hidden" name="contact_email" value="{{ request.user.email }}">
+                <input type="hidden" name="contact_phone" value="{{ request.user.phone_number|default:'5555555555' }}">
+                
+                <div class="mb-6">
+                    <div class="flex items-center mb-4">
+                        <input type="checkbox" id="terms" name="terms" class="h-4 w-4 text-blue-600" required>
+                        <label for="terms" class="ml-2 text-sm text-gray-700">
+                            I confirm that all passenger details are correct and I agree to the 
+                            <a href="#" class="text-blue-600 hover:underline">Terms & Conditions</a> and 
+                            <a href="#" class="text-blue-600 hover:underline">Fare Rules</a>
+                        </label>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <input type="checkbox" id="price_accept" name="price_accept" class="h-4 w-4 text-blue-600" required>
+                        <label for="price_accept" class="ml-2 text-sm text-gray-700">
+                            I accept the final price of ${{ price_details.total|default:selected_flight.price }}
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between">
+                    <a href="{% url 'booking_form' %}" class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                        ← Back to Edit
+                    </a>
+                    <button type="submit" class="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700">
+                        Confirm & Book Now
+                    </button>
+                </div>
+            </form>
+            
+            <p class="text-xs text-gray-500 mt-4">
+                <i class="fas fa-clock mr-1"></i>
+                This pricing is valid until {{ expires_at }}
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+.airport-display {
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.airport-display .text-lg {
+    font-size: 1.125rem;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+}
+
+.airport-display .text-gray-600 {
+    font-size: 0.875rem;
+    color: #4b5563;
+    margin-bottom: 0.5rem;
+}
+
+.airport-display .text-sm {
+    font-size: 0.875rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const terms = document.getElementById('terms');
+            const priceAccept = document.getElementById('price_accept');
+            
+            if (!terms.checked) {
+                e.preventDefault();
+                alert('Please agree to the Terms & Conditions');
+                terms.focus();
+                return false;
+            }
+            
+            if (!priceAccept.checked) {
+                e.preventDefault();
+                alert('Please accept the final price');
+                priceAccept.focus();
+                return false;
+            }
+            
+            // Show loading state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
+            submitBtn.disabled = true;
+            
+            return true;
+        });
+    }
+});
+</script>
+{% endblock %}
