@@ -3,12 +3,30 @@ Django settings for flight_sys project.
 Production-ready with all required configurations
 """
 import os
+import logging
 from pathlib import Path
 from datetime import timedelta
 from decouple import config
 
+logger = logging.getLogger(__name__)
+
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+# os.environ
+logger.info('here are the environment variables')
+for k in os.environ:
+    logger.info(f"{k}={os.environ[k]}")
+logger.info('end')
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(exist_ok=True)
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-change-in-production')
@@ -16,7 +34,20 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-change-in-pro
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(' ')
+ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,[::1],flight-reservation-app-d3yv.onrender.com').split(',')]
+
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+if not DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = [
+        'https://flight-reservation-app-d3yv.onrender.com',
+    ]
+
+CSRF_TRUSTED_ORIGIN = os.environ.get('CSRF_TRUSTED_ORIGIN', 'http://localhost').split(' ')
+CSRF_TRUSTED_ORIGIN = [
+    'https://flight-reservation-app-d3yv.onrender.com',
+]
+
 
 # Application definition
 INSTALLED_APPS = [
